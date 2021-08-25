@@ -33,6 +33,12 @@ Servo gripper;
 
 unsigned iter = 0;
 
+void setup() {
+    Serial.begin(115200);
+    pinMode(BUTTON_PIN, INPUT);
+    Braccio.begin();
+}
+
 struct Controller {
 public:
 
@@ -87,9 +93,9 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A0;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
-        } else if (state == GO_WAIT && m1_is_0 && m2_is_140 && m3_is_0 && m4_is_10 && m5_is_0 && m6_is_73) {
+        } else if (state == GO_WAIT && m1_is_0 && m2_is_140 && m3_is_0 && m4_is_10 && m5_is_0 && m6_is_10) {
             state = WAIT;
 
         } else if (state == WAIT && input) {
@@ -99,81 +105,81 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
-        } else if (state == GO_UP && m1_is_0 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_73) {
+        } else if (state == GO_UP && m1_is_0 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_10) {
             state = GO_LOW;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A100;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
-        } else if (state == GO_LOW && m1_is_0 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_73) {
+        } else if (state == GO_LOW && m1_is_0 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_10) {
             state = GO_PICKUP;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A100;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
-        } else if (state == GO_PICKUP && m1_is_0 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_10) {
+        } else if (state == GO_PICKUP && m1_is_0 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_73) {
             state = GO_UP_PICKUP;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A115;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
-        } else if (state == GO_UP_PICKUP && m1_is_0 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_10) {
+        } else if (state == GO_UP_PICKUP && m1_is_0 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_73) {
             state = GO_UP_OUT_PICKUP;
             m1_angle = M1Angle::A180;
             m2_angle = M2Angle::A115;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
-        } else if (state == GO_UP_OUT_PICKUP && m1_is_180 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_10) {
+        } else if (state == GO_UP_OUT_PICKUP && m1_is_180 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_73) {
             state = GO_LOW_OUT_PICKUP;
             m1_angle = M1Angle::A180;
             m2_angle = M2Angle::A100;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
-        } else if (state == GO_LOW_OUT_PICKUP && m1_is_180 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_10) {
+        } else if (state == GO_LOW_OUT_PICKUP && m1_is_180 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_73) {
             state = GO_DROP;
             m1_angle = M1Angle::A180;
             m2_angle = M2Angle::A100;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
-        } else if (state == GO_DROP && m1_is_180 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_73) {
+        } else if (state == GO_DROP && m1_is_180 && m2_is_100 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_10) {
             state = GO_UP_OUT;
             m1_angle = M1Angle::A180;
             m2_angle = M2Angle::A115;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
-        } else if (state == GO_UP_OUT && m1_is_180 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_73) {
+        } else if (state == GO_UP_OUT && m1_is_180 && m2_is_115 && m3_is_0 && m4_is_15 && m5_is_90 && m6_is_10) {
             state = GO_DONE;
             m1_angle = M1Angle::A180;
             m2_angle = M2Angle::A140;
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
-        } else if (state == GO_DONE && m1_is_180 && m2_is_140 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_73) {
+        } else if (state == GO_DONE && m1_is_180 && m2_is_140 && m3_is_0 && m4_is_10 && m5_is_90 && m6_is_10) {
             state = DONE;
 
 
@@ -184,7 +190,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A0;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         }
         
@@ -269,12 +275,6 @@ void callback(
 
 }
 
-void setup() {
-    Serial.begin(115200);
-    pinMode(BUTTON_PIN, INPUT);
-    Braccio.begin();
-}
-
 void loop() {
     iter++;
 
@@ -301,8 +301,8 @@ void loop() {
     bool m4_15 = wrist_ver.read() == 15;
     bool m5_0 = wrist_rot.read() == 0;
     bool m5_90 = wrist_rot.read() == 90;
-    bool m6_10 = gripper.read() == 180-10;
-    bool m6_73 = gripper.read() == 180-73;
+    bool m6_10 = gripper.read() == 10;
+    bool m6_73 = gripper.read() == 73;
 
     Serial.println("[INPUTS]");
     Serial.print("[" + String(iter) + "] " + "[but = " + String(but) + "] ");
