@@ -31,62 +31,53 @@ Servo wrist_ver;
 Servo wrist_rot;
 Servo gripper;
 
-// enum State {IDLE_, GO_WAIT, WAIT, GO_UP, UP, GO_LOW, LOW_, GO_PICKUP, PICKUP, GO_UP_PICKUP, UP_PICKUP,
-//             GO_UP_OUT_PICKUP, UP_OUT_PICKUP, GO_LOW_OUT_PICKUP, LOW_OUT_PICKUP, GO_DROP, DROP, GO_UP_OUT, UP_OUT, DONE
-//            };
-// State state = IDLE_;
-
-// String strState[] = {IDLE_, GO_WAIT, WAIT, GO_UP, UP, GO_LOW, LOW_, GO_PICKUP, PICKUP, GO_UP_PICKUP, UP_PICKUP,
-//             GO_UP_OUT_PICKUP, UP_OUT_PICKUP, GO_LOW_OUT_PICKUP, LOW_OUT_PICKUP, GO_DROP, DROP, GO_UP_OUT, UP_OUT, DONE
-//            };
-
 unsigned iter = 0;
 
 void go_wait() {
-    Braccio.ServoMovement(20,  0, 140, 0, 10, 0, 73);
+    Braccio.ServoMovement(20,  0, 140, 0, 10, 0, 10);
 }
 
 // Верхняя позиция на 0 град
 void go_up() {
-    Braccio.ServoMovement(20, 0, 115,  0, 15, 90, 73);
+    Braccio.ServoMovement(20, 0, 115,  0, 15, 90, 10);
 }
 
 // Нижняя позиция на 0 град
 void go_low() {
-    Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 73);
+    Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 10);
 }
 
 // Захват груза
 void go_pickup() {
-    Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 10);
+    Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 73);
 }
 
 // Верхняя позиция с грузом на 0
 void go_up_pickup() {
-    Braccio.ServoMovement(30, 0, 115,  0, 15, 90, 10);
+    Braccio.ServoMovement(30, 0, 115,  0, 15, 90, 73);
 }
 //////////////////////////////////////////////////
 // Переход на указанный угол с грузом (верхняя позиция)
 void go_up_out_pickup() {
-    Braccio.ServoMovement(20, 180, 115,  0, 15, 90, 10);
+    Braccio.ServoMovement(20, 180, 115,  0, 15, 90, 73);
 }
 
 // Нижняя позиция с грузом на указанном угле
 void go_low_out_pickup() {
-    Braccio.ServoMovement(30, 180, 100,  0, 10, 90, 10);
+    Braccio.ServoMovement(30, 180, 100,  0, 10, 90, 73);
 }
 
 // Бросание груза на указанном угле
 void go_drop() {
-    Braccio.ServoMovement(30, 180, 100,  0, 10, 90, 73);
+    Braccio.ServoMovement(30, 180, 100,  0, 10, 90, 10);
 }
 
 void go_up_out() {
-    Braccio.ServoMovement(20, 180, 115,  0, 15, 90, 73);
+    Braccio.ServoMovement(20, 180, 115,  0, 15, 90, 10);
 }
 
 void go_done() {
-    Braccio.ServoMovement(20,  180, 140, 0, 10, 0, 73);
+    Braccio.ServoMovement(20,  180, 140, 0, 10, 0, 10);
 }
 
 struct Controller {
