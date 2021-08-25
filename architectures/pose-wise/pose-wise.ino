@@ -38,13 +38,23 @@ Servo gripper;
 enum State{IDLE_, WAIT, UP, LOW_, PICKUP, UP_PICKUP, UP_OUT_PICKUP, LOW_OUT_PICKUP, DROP, DONE};
 State state = IDLE_;
 
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(BUTTON_PIN, INPUT);
+  Serial.println("going to wait...");
+  Braccio.begin();
+  Serial.println("reached wait state");
+  state = WAIT;
+}
+
 class Manipulator{
   public:
     Manipulator(){};
 
     // переход в позицию ожидания вход сигнала
     void go_wait(){ 
-      Braccio.ServoMovement(20,  0, 140, 0, 10, 0, 73); 
+      Braccio.ServoMovement(20,  0, 140, 0, 10, 0, 10); 
       delay(100);
     }
     
@@ -115,56 +125,47 @@ class Manipulator{
     
   private:
     void _go_up(){
-      Braccio.ServoMovement(20, 0, 115,  0, 15, 90, 73);
+      Braccio.ServoMovement(20, 0, 115,  0, 15, 90, 10);
     }
     
     void _go_low(){
-      Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 73);
-    }
-    
-    void _go_pickup(){
       Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 10);
     }
     
+    void _go_pickup(){
+      Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 73);
+    }
+    
     void _go_up_pickup(){
-      Braccio.ServoMovement(30, 0, 115,  0, 15, 90, 10);
+      Braccio.ServoMovement(30, 0, 115,  0, 15, 90, 73);
     }
     //////////////////////////////////////////////////
     void _go_up_out_pickup(int deg){
       if (deg <= 180){
-        Braccio.ServoMovement(20, deg, 115,  0, 15, 90, 10);
+        Braccio.ServoMovement(20, deg, 115,  0, 15, 90, 73);
       } else {
-        Braccio.ServoMovement(20, deg-180, 65, 180, 165, 90, 10);
+        Braccio.ServoMovement(20, deg-180, 65, 180, 165, 90, 73);
       } 
     }
     
     void _go_low_out_pickup(int deg){
       if (deg <= 180){
-        Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 10);
+        Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 73);
       } else {
-        Braccio.ServoMovement(30, deg-180, 80, 180, 170, 90, 10);
+        Braccio.ServoMovement(30, deg-180, 80, 180, 170, 90, 73);
       } 
     }
     
     void _go_drop(int deg){
       if (deg <= 180){
-        Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 73);
+        Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 10);
       } else {
-        Braccio.ServoMovement(30,  deg-180, 80, 180, 170, 90, 73);
+        Braccio.ServoMovement(30,  deg-180, 80, 180, 170, 90, 10);
       }
     }
 };
 
 Manipulator man;
-
-void setup() {
-  Serial.begin(9600);
-  pinMode(BUTTON_PIN, INPUT);
-  Serial.println("going to wait...");
-  Braccio.begin();
-  Serial.println("reached wait state");
-  state = WAIT;
-}
 
 void loop() {
   man.go(digitalRead(BUTTON_PIN),210);
