@@ -64,7 +64,7 @@ void loop() {
 
   //1 Стартовая точка
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  0, 40, 180, 170, 0, 73); 
+  Braccio.ServoMovement(30,  0, 40, 180, 170, 0, 10); 
   delay(100);
 
   ////////////////////////////////////////////
@@ -79,7 +79,7 @@ void loop() {
            
   //2 Начало на базе 0 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  0, 100, 0, 10, 90, 73); 
+  Braccio.ServoMovement(30,  0, 100, 0, 10, 90, 10); 
   delay(100); 
 
   while (butt == false){
@@ -89,7 +89,7 @@ void loop() {
   
   //3 Захват на базе 0 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  0, 100, 0, 10, 90, 10); 
+  Braccio.ServoMovement(30,  0, 100, 0, 10, 90, 73); 
   delay(100);
 
   while (butt == false){
@@ -99,7 +99,7 @@ void loop() {
 
   //4 Prepos переноса, база 0 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  0, 115, 0, 15, 90, 10);
+  Braccio.ServoMovement(30,  0, 115, 0, 15, 90, 73);
   delay(100);
 
   while (butt == false){
@@ -109,7 +109,7 @@ void loop() {
 
   //5 Перенос, база 180
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  180, 115, 0, 15, 90, 10);
+  Braccio.ServoMovement(30,  180, 115, 0, 15, 90, 73);
   delay(100);
 
   while (butt == false){
@@ -119,7 +119,7 @@ void loop() {
 
   //6 Конечная точка на базе 180
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  180, 100, 0, 10, 90, 10); 
+  Braccio.ServoMovement(30,  180, 100, 0, 10, 90, 73); 
   delay(100); 
 
   while (butt == false){
@@ -129,7 +129,7 @@ void loop() {
 
   //7 Положить на базе 180 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  180, 100, 0, 10, 90, 73); 
+  Braccio.ServoMovement(30,  180, 100, 0, 10, 90, 10); 
   delay(100);
 
   ////////////////////////////////////////////
@@ -143,7 +143,7 @@ void loop() {
            
   //8 Начало на базе 90 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  90, 100, 0, 10, 90, 73); 
+  Braccio.ServoMovement(30,  90, 100, 0, 10, 90, 10); 
   delay(100); 
 
   while (butt == false){
@@ -153,7 +153,7 @@ void loop() {
 
   //9 Захват на базе 90 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  90, 100, 0, 10, 90, 10); 
+  Braccio.ServoMovement(30,  90, 100, 0, 10, 90, 73); 
   delay(100);
 
   while (butt == false){
@@ -163,7 +163,7 @@ void loop() {
 
   //10 Prepos переноса, база 90 град
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  90, 115, 0, 15, 90, 10);
+  Braccio.ServoMovement(30,  90, 115, 0, 15, 90, 73);
   delay(100);
 
   while (butt == false){
@@ -173,7 +173,7 @@ void loop() {
 
   //11 Перенос на 270
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  90, 65, 180, 165, 90, 10);
+  Braccio.ServoMovement(30,  90, 65, 180, 165, 90, 73);
   delay(100);
 
   while (butt == false){
@@ -183,7 +183,7 @@ void loop() {
 
   //12 Конечная точка на 270
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  90, 80, 180, 170, 90, 10); 
+  Braccio.ServoMovement(30,  90, 80, 180, 170, 90, 73); 
   delay(100); 
 
   while (butt == false){
@@ -193,7 +193,7 @@ void loop() {
 
   //13 Положить на 270
                       //sd  M1, M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,  90, 80, 180, 170, 90, 73); 
+  Braccio.ServoMovement(30,  90, 80, 180, 170, 90, 10); 
   delay(100);
 
   ////////////////////////////////////////////
