@@ -1,4 +1,4 @@
-= MyBraccio Library for Arduino =
+= MyBraccioGripper Library for Arduino =
 
 The library offers easy access to the data from the onboard TinkerKit Braccio, and provides moves for the Braccio.
 
