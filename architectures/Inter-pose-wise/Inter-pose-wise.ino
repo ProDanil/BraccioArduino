@@ -105,16 +105,11 @@ void callback(
 
 }
 
-/*std::string state2method(State state) {
-    //
-}*/
-
 class Manipulator {
 public:
     Manipulator() {};
 
     void go_step(bool input, int deg) {
-        //Serial.print("[#iter] [input = from BUTTON_PIN]");
         Serial.println("["+String(iter)+"] "+"[input "+String(input)+"]"); //номер итерации, состояние кнопки
 
         if (state == WAIT || state == UP || state == LOW_ || state == PICKUP || state == UP_PICKUP ||
@@ -122,17 +117,12 @@ public:
             digitalWrite(CONTROL_PIN, HIGH);
             if (state == WAIT && input == 1) {
                 state = state + 1;
-                    //Serial.print("[#iter] [out = go_wait]");
-                    //Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
             } else if (state != WAIT) {
                 if (state == DONE){
                     Serial.println("["+String(iter)+"] "+"[out = DONE!]");
                     state = GO_WAIT;
                 } else {state = state + 1;}
 
-                // if (state == GO_WAIT) {
-                //     Serial.print("[#iter] [out = go_wait]");
-                // } else if ...
             }
 
         } else if (state == GO_WAIT) {
@@ -167,7 +157,7 @@ public:
     // переход в позицию ожидания вход сигнала
     void go_wait() {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
-        Braccio.ServoMovement(20,  0, 140, 0, 10, 0, 73, callback);
+        Braccio.ServoMovement(20,  0, 140, 0, 10, 0, 10, callback);
         state = state+1;
         delay(100);
     }
@@ -241,28 +231,28 @@ private:
     // Верхняя позиция на 0 град
     void _go_up() {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
-        Braccio.ServoMovement(20, 0, 115,  0, 15, 90, 73, callback);
+        Braccio.ServoMovement(20, 0, 115,  0, 15, 90, 10, callback);
         state = state+1;
     }
 
     // Нижняя позиция на 0 град
     void _go_low() {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
-        Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 73, callback);
+        Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 10, callback);
         state = state+1;
     }
 
     // Захват груза
     void _go_pickup() {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
-        Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 10, callback);
+        Braccio.ServoMovement(30, 0, 100,  0, 10, 90, 73, callback);
         state = state+1;
     }
 
     // Верхняя позиция с грузом на 0
     void _go_up_pickup() {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
-        Braccio.ServoMovement(30, 0, 115,  0, 15, 90, 10, callback);
+        Braccio.ServoMovement(30, 0, 115,  0, 15, 90, 73, callback);
         state = state+1;
     }
     //////////////////////////////////////////////////
@@ -270,9 +260,9 @@ private:
     void _go_up_out_pickup(int deg) {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
         if (deg <= 180) {
-            Braccio.ServoMovement(20, deg, 115,  0, 15, 90, 10, callback);
+            Braccio.ServoMovement(20, deg, 115,  0, 15, 90, 73, callback);
         } else {
-            Braccio.ServoMovement(20, deg - 180, 65, 180, 165, 90, 10, callback);
+            Braccio.ServoMovement(20, deg - 180, 65, 180, 165, 90, 73, callback);
         }
         state = state+1;
     }
@@ -281,9 +271,9 @@ private:
     void _go_low_out_pickup(int deg) {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
         if (deg <= 180) {
-            Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 10, callback);
+            Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 73, callback);
         } else {
-            Braccio.ServoMovement(30, deg - 180, 80, 180, 170, 90, 10, callback);
+            Braccio.ServoMovement(30, deg - 180, 80, 180, 170, 90, 73, callback);
         }
         state = state+1;
     }
@@ -292,9 +282,9 @@ private:
     void _go_drop(int deg) {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
         if (deg <= 180) {
-            Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 73, callback);
+            Braccio.ServoMovement(30, deg, 100,  0, 10, 90, 10, callback);
         } else {
-            Braccio.ServoMovement(30,  deg - 180, 80, 180, 170, 90, 73, callback);
+            Braccio.ServoMovement(30,  deg - 180, 80, 180, 170, 90, 10, callback);
         }
         state = state+1;
     }
@@ -302,9 +292,9 @@ private:
     void _go_up_out(int deg) {
         Serial.println("["+String(iter)+"] "+"[out = "+strState[state]+"]");
         if (deg <= 180) {
-            Braccio.ServoMovement(20, deg, 115,  0, 15, 90, 73, callback);
+            Braccio.ServoMovement(20, deg, 115,  0, 15, 90, 10, callback);
         } else {
-            Braccio.ServoMovement(20, deg - 180, 65, 180, 165, 90, 73, callback);
+            Braccio.ServoMovement(20, deg - 180, 65, 180, 165, 90, 10, callback);
         }
         state = state+1;
     }
