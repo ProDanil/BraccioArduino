@@ -1,4 +1,8 @@
-/**/
+/* Работа манипулятора в 3 режимах:
+   * START - стартовая позиция
+   * WORK1 - перенос груза из 0 в 180
+   * WORK2 - перенос груза из 90 в 270
+*/
 
 #include <MyBraccio.h>
 #include <Servo.h>
@@ -47,49 +51,49 @@ void push_butt(){
 }
 
 void do_start(){
-  Braccio.ServoMovement(30,  0, 40, 180, 170, 0, 73); 
+  Braccio.ServoMovement(30,  0, 40, 180, 170, 0, 10); 
   delay(100);
 }
 
 void do_work1(){
                       //sd    M1,  M2, M3, M4, M5, M6
-  Braccio.ServoMovement(30,    0, 100,  0, 10, 90, 73); 
-  delay(100);
-  
   Braccio.ServoMovement(30,    0, 100,  0, 10, 90, 10); 
   delay(100);
   
-  Braccio.ServoMovement(30,    0, 115,  0, 15, 90, 10);
+  Braccio.ServoMovement(30,    0, 100,  0, 10, 90, 73); 
   delay(100);
   
-  Braccio.ServoMovement(30,  180, 115,  0, 15, 90, 10);
+  Braccio.ServoMovement(30,    0, 115,  0, 15, 90, 73);
   delay(100);
   
-  Braccio.ServoMovement(30,  180, 100,  0, 10, 90, 10); 
+  Braccio.ServoMovement(30,  180, 115,  0, 15, 90, 73);
+  delay(100);
+  
+  Braccio.ServoMovement(30,  180, 100,  0, 10, 90, 73); 
   delay(100);
    
-  Braccio.ServoMovement(30,  180, 100,  0, 10, 90, 73); 
+  Braccio.ServoMovement(30,  180, 100,  0, 10, 90, 10); 
   delay(100);
 }
 
 void do_work2(){
                        //sd  M1,  M2,  M3,  M4, M5, M6
-  Braccio.ServoMovement(30,  90, 100,   0,  10, 90, 73); 
-  delay(100); 
-
   Braccio.ServoMovement(30,  90, 100,   0,  10, 90, 10); 
-  delay(100);
-
-  Braccio.ServoMovement(30,  90, 115,   0,  15, 90, 10);
-  delay(100);
-
-  Braccio.ServoMovement(30,  90,  65, 180, 165, 90, 10);
-  delay(100);
-
-  Braccio.ServoMovement(30,  90,  80, 180, 170, 90, 10); 
   delay(100); 
+
+  Braccio.ServoMovement(30,  90, 100,   0,  10, 90, 73); 
+  delay(100);
+
+  Braccio.ServoMovement(30,  90, 115,   0,  15, 90, 73);
+  delay(100);
+
+  Braccio.ServoMovement(30,  90,  65, 180, 165, 90, 73);
+  delay(100);
 
   Braccio.ServoMovement(30,  90,  80, 180, 170, 90, 73); 
+  delay(100); 
+
+  Braccio.ServoMovement(30,  90,  80, 180, 170, 90, 10); 
   delay(100);
 }
 
