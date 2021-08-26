@@ -88,7 +88,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A0;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         } else if (state == GO_WAIT && m_is_done) {
             state = WAIT;
@@ -100,7 +100,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         } else if (state == GO_UP && m_is_done) {
             state = GO_LOW;
@@ -109,7 +109,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         } else if (state == GO_LOW && m_is_done) {
             state = GO_PICKUP;
@@ -118,7 +118,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
         } else if (state == GO_PICKUP && m_is_done) {
             state = GO_UP_PICKUP;
@@ -127,7 +127,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
         } else if (state == GO_UP_PICKUP && m_is_done) {
             state = GO_UP_OUT_PICKUP;
@@ -136,7 +136,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
         } else if (state == GO_UP_OUT_PICKUP && m_is_done) {
             state = GO_LOW_OUT_PICKUP;
@@ -145,7 +145,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A10;
+            m6_angle = M6Angle::A73;
 
         } else if (state == GO_LOW_OUT_PICKUP && m_is_done) {
             state = GO_DROP;
@@ -154,7 +154,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         } else if (state == GO_DROP && m_is_done) {
             state = GO_UP_OUT;
@@ -163,7 +163,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A15;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         } else if (state == GO_UP_OUT && m_is_done) {
             state = GO_DONE;
@@ -172,7 +172,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         } else if (state == GO_DONE && m_is_done) {
             state = DONE;
@@ -185,7 +185,7 @@ public:
             m3_angle = M3Angle::A0;
             m4_angle = M4Angle::A10;
             m5_angle = M5Angle::A0;
-            m6_angle = M6Angle::A73;
+            m6_angle = M6Angle::A10;
 
         }
         
@@ -250,31 +250,6 @@ void loop() {
     iter++;
 
     bool but = digitalRead(BUTTON_PIN);
-
-    /*Serial.println();
-    Serial.print("m1 = "+String(base.read()));
-    Serial.print(" m2 = "+String(shoulder.read()));
-    Serial.print(" m3 = "+String(elbow.read()));
-    Serial.print(" m4 = "+String(wrist_ver.read()));
-    Serial.print(" m5 = "+String(wrist_rot.read()));
-    Serial.print(" m6 = "+String(gripper.read()));
-    Serial.println();*/
-    
-    /*bool m1_0 = base.read() == 0;
-    bool m1_180 = base.read() == 180;
-    bool m2_40 = shoulder.read() == 40;
-    bool m2_100 = shoulder.read() == 100;
-    bool m2_115 = shoulder.read() == 115;
-    bool m2_140 = shoulder.read() == 140;
-    bool m3_0 = elbow.read() == 0;
-    bool m3_180 = elbow.read() == 180;
-    bool m4_10 = wrist_ver.read() == 10;
-    bool m4_15 = wrist_ver.read() == 15;
-    bool m5_0 = wrist_rot.read() == 0;
-    bool m5_90 = wrist_rot.read() == 90;
-    bool m6_10 = gripper.read() == 180-10;
-    bool m6_73 = gripper.read() == 180-73;*/
-
 
     control.go_step(but, true, true, true, true, true, true);
     
