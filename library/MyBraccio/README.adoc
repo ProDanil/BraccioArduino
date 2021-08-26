@@ -3,6 +3,7 @@
 The library offers easy access to the data from the onboard TinkerKit Braccio, and provides moves for the Braccio.
 
 Upgrades:
+
 - Fixed a problem with the gripper; 
 - Fixed incorrect rot/ver wrist servo locations.
 
