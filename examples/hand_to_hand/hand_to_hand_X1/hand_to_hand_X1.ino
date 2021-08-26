@@ -147,8 +147,6 @@ public:
             m6_angle = M6Angle::A73;
 
         } else if (state == GO_UP_PICKUP && m_is_done) {
-            // pin = 1;
-        	// digitalWrite(DONE_PIN, HIGH);
             state = GO_UP_OUT_PICKUP;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A130;
@@ -161,8 +159,6 @@ public:
             state = WAIT_ACK;
 
         } else if (state == WAIT_ACK && input_ack) {
-            // pin = 0;
-        	// digitalWrite(DONE_PIN, LOW);
             state = GO_DROP;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A130;
@@ -253,7 +249,6 @@ void loop() {
 
     control.go_step(but, ack, true, true, true, true, true, true);
 
-    // digitalWrite(DONE_PIN, static_cast<bool>(control.pin));
     if (static_cast<int>(control.state)==7){
         digitalWrite(DONE_PIN, HIGH);
         delay(50);
