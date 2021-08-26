@@ -1,20 +1,5 @@
 /*
- Braccio.cpp - board library Version 2.0
- Written by Andrea Martino and Angelo Ferrante
-
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ Исправленная библиотека Braccio.h
  */
 
 #include "MyBraccio.h"
@@ -79,12 +64,6 @@ unsigned int _Braccio::begin(int soft_start_level) {
 /////////////////////////////////////////////////////////////
         
 	//For each step motor this set up the initial degree
-	/*base.write(0);
-	shoulder.write(40);
-	elbow.write(180);
-	wrist_ver.write(170);
-	wrist_rot.write(0);
-	gripper.write(180-73);*/
 
 	base.write(0);
 	shoulder.write(140);
@@ -92,16 +71,9 @@ unsigned int _Braccio::begin(int soft_start_level) {
 	wrist_ver.write(10);
 	wrist_rot.write(0);
 	gripper.write(10);
-	// gripper.write(180-73);
 
 
 	//Previous step motor position
-	/*step_base = 0;
-	step_shoulder = 40;
-	step_elbow = 180;
-	step_wrist_ver = 170;
-	step_wrist_rot = 0;
-	step_gripper = 73;*/
 	step_base = 0;
 	step_shoulder = 140;
 	step_elbow = 0;
@@ -157,14 +129,8 @@ void _Braccio::_softStart(int soft_start_level){
  * @param vWrist_rot next wrist vertical servo motor degree
  * @param vgripper next gripper servo motor degree
  */
-int _Braccio::ServoMovement(int stepDelay, int vBase, int vShoulder, int vElbow,int vWrist_ver, int vWrist_rot, int vgripper, void (*callback)(int,int,int,int,int,int,int,int,int,int,int,int)) {
-
-	/*Serial.print("step_base = "); Serial.println(step_base);
-	Serial.print("step_shoulder = "); Serial.println(step_shoulder);
-	Serial.print("step_elbow = "); Serial.println(step_elbow);
-	Serial.print("step_wrist_rot = "); Serial.println(step_wrist_rot);
-	Serial.print("step_wrist_ver = "); Serial.println(step_wrist_ver);
-	Serial.print("step_gripper = "); Serial.println(step_gripper);*/
+int _Braccio::ServoMovement(int stepDelay, int vBase, int vShoulder, int vElbow,int vWrist_ver, 
+			    int vWrist_rot, int vgripper, void (*callback)(int,int,int,int,int,int,int,int,int,int,int,int)) {
 
 	// Check values, to avoid dangerous positions for the Braccio
     	if (stepDelay > 30) stepDelay = 30;
@@ -181,7 +147,6 @@ int _Braccio::ServoMovement(int stepDelay, int vBase, int vShoulder, int vElbow,
 	if (vWrist_rot < 0) vWrist_rot=0;
     	if (vgripper < 10) vgripper = 10;
 	if (vgripper > 73) vgripper = 73;
-	//vgripper = 180 - vgripper;
 
 	int exit = 1;
 	int step = 0;
