@@ -128,15 +128,6 @@ public:
             m5_angle = M5Angle::A90;
             m6_angle = M6Angle::A73;
 
-        /*} else if (state == GO_PICKUP && input) {
-            state = GO_SAFE;
-            m1_angle = M1Angle::A180;
-            m2_angle = M2Angle::A120;
-            m3_angle = M3Angle::A30;
-            m4_angle = M4Angle::A50;
-            m5_angle = M5Angle::A90;
-            m6_angle = M6Angle::A73;*/
-
         } else if (state == GO_PICKUP && input){
             state = GO_SAFE_OUT;
             m1_angle = M1Angle::A0;
@@ -251,9 +242,4 @@ void loop() {
         delay(50);
         digitalWrite(ACK_PIN, LOW);
     }
-    /*if (static_cast<int>(control.state)==6){
-        digitalWrite(ACK_PIN, HIGH);
-        delay(10);
-        digitalWrite(ACK_PIN, LOW);
-    }*/
 }
