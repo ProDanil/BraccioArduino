@@ -1,11 +1,12 @@
 #include <BraccioV2.h>
 #include <Wire.h>
-#include <MyCommonUtils.hpp>
+// #include <MyCommonUtils.hpp>
 
-#define PIN_REQ 0
-#define PIN_ACK 0
-#define PIN_IN 0
-#define PIN_OUT 0
+// #define PIN_REQ 0
+// #define PIN_ACK 0
+// #define PIN_IN 0
+// #define PIN_OUT 0
+
 #define I2C_SLAVE1_ADDRESS 11
 
 /*#define SEND(value) \
