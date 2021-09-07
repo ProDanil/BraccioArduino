@@ -43,8 +43,8 @@ ControllerX2 control2;
 
 int array_state_X1[6] = {0, 0, 0, 0, 0, 0};
 int array_state_X2[6] = {0, 0, 0, 0, 0, 0};
-int send_state_X1[6] = {0, 0, 0, 0, 0, 0};
-int send_state_X2[6] = {0, 0, 0, 0, 0, 0};
+uint8_t send_state_X1[6] = {0, 0, 0, 0, 0, 0};
+uint8_t send_state_X2[6] = {0, 0, 0, 0, 0, 0};
 
 void setup() {
     Wire.begin(); // begin as master
@@ -92,12 +92,12 @@ void loop() {
         // TODO: FIN?
 
         // Calculate inputs for the controller
-        bool is_done_m1 = (angle_base_X1 == 0);
-        bool is_done_m2 = (angle_shoulder_X1 == 0);
-        bool is_done_m3 = (angle_elbow_X1 == 0);
-        bool is_done_m4 = (angle_wrist_ver_X1 == 0);
-        bool is_done_m5 = (angle_wrist_rot_X1 == 0);
-        bool is_done_m6 = (angle_gripper_X1 == 0);
+        bool is_done_m1 = (array_state_X1[0] == send_state_X1[0]);
+        bool is_done_m2 = (array_state_X1[1] == send_state_X1[1]);
+        bool is_done_m3 = (array_state_X1[2] == send_state_X1[2]);
+        bool is_done_m4 = (array_state_X1[3] == send_state_X1[3]);
+        bool is_done_m5 = (array_state_X1[4] == send_state_X1[4]);
+        bool is_done_m6 = (array_state_X1[5] == send_state_X1[5]);
 
         // Execute the controller
         auto out = control1.go_step(
@@ -155,16 +155,16 @@ void loop() {
         // TODO: FIN?
 
         // Calculate inputs for the controller
-        bool is_done_m1 = (angle_base_X2 == 0);
-        bool is_done_m2 = (angle_shoulder_X2 == 0);
-        bool is_done_m3 = (angle_elbow_X2 == 0);
-        bool is_done_m4 = (angle_wrist_ver_X2 == 0);
-        bool is_done_m5 = (angle_wrist_rot_X2 == 0);
-        bool is_done_m6 = (angle_gripper_X2 == 0);
+        bool is_done_m1 = (array_state_X2[0] == send_state_X2[0]);
+        bool is_done_m2 = (array_state_X2[1] == send_state_X2[1]);
+        bool is_done_m3 = (array_state_X2[2] == send_state_X2[2]);
+        bool is_done_m4 = (array_state_X2[3] == send_state_X2[3]);
+        bool is_done_m5 = (array_state_X2[4] == send_state_X2[4]);
+        bool is_done_m6 = (array_state_X2[5] == send_state_X2[5]);
 
         // Execute the controller
         auto out = control2.go_step(
-            button_Z1, button_Z2,
+//            button_Z1, button_Z2,
             input_Z1, input_Z2,
             is_done_m1, is_done_m2,
             is_done_m3, is_done_m4,
