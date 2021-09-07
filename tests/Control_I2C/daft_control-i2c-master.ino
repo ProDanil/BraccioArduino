@@ -74,7 +74,7 @@ void loop() {
         Wire.requestFrom(I2C_SLAVE1_ADDRESS, 6);
         Serial.println("recieved state X1: ");
 
-        for (int i=0; i<6, i++){
+        for (int i=0; i<6; i++){
             array_state_X1[i] = Wire.read();
             Serial.print(array_state_X1[i]);
             Serial.print(" ");
@@ -137,7 +137,7 @@ void loop() {
         Wire.requestFrom(I2C_SLAVE2_ADDRESS, 6);
         Serial.println("recieved state X2: ");
 
-        for (int i=0; i<6, i++){
+        for (int i=0; i<6; i++){
             array_state_X2[i] = Wire.read();
             Serial.print(array_state_X2[i]);
             Serial.print(" ");
