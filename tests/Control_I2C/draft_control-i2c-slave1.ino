@@ -75,7 +75,7 @@ void slave_on_reсeive(){
 
     Serial.println("recieved state from master: ");
 
-    for (int i=0; i<6, i++){
+    for (int i=0; i<6; i++){
         array_state_X1[i] = Wire.read();
         Serial.print(array_state_X1[i]);
         Serial.print(" ");
