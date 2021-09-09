@@ -1,19 +1,18 @@
-#include <BraccioV2.h>
+#include <MyBraccioV2.h>
 #include <Wire.h>
 
-#define I2C_SLAVE1_ADDRESS 11
+#define I2C_SLAVE_ADDRESS 11
 
 Braccio arm;
 
-int array_angles_X1[6] = {0, 0, 0, 0, 0, 0};
+uint8_t target_angle[6];
+uint8_t current_angle[6];
 
 // Setup was copied from the 'Basic Movement' example of BraccioV2 lib.
 void setup() {
-    Wire.begin(I2C_SLAVE1_ADDRESS);
+    Wire.begin(I2C_SLAVE_ADDRESS);
     Serial.begin(9600);
     Serial.println("Initializing... Please Wait");  //Start of initialization, see note below regarding begin method.
-
-    // TODO: setup pins
 
     //Update these lines with the calibration code outputted by the calibration program.
     arm.setJointCenter(WRIST_ROT, 90);
@@ -44,41 +43,48 @@ void setup() {
     //to initialize the power circuitry.
     Serial.println("Initialization Complete");
 
-    // There are start position
-    array_angles_X1[0] = ;
-    array_angles_X1[1] = ;
-    array_angles_X1[2] = ;
-    array_angles_X1[3] = ;
-    array_angles_X1[4] = ;
-    array_angles_X1[5] = ;
-
-    Wire.onRequest(slave_on_request);
-    Wire.onReceive(slave_on_reсeive);
-}
-
-void slave_on_reсeive(){
-
-    Serial.println("recieved state from master: ");
-
-    for (int i=0; i<6, i++){
-        array_angles_X1[i] = Wire.read();
-        Serial.print(array_angles_X1[i]);
-        Serial.print(" ");
+    // Start position
+    for (size_t i = 0; i < 6; i++) {
+        current_angle[i] = arm._currentJointPositions[i];
     }
 
-    Serial.println();
-
-    arm.setAllAbsolute(array_angles_X1[0], array_angles_X1[1],
-                    array_angles_X1[2], array_angles_X1[3],
-                    array_angles_X1[4], array_angles_X1[5]);
-
+    Wire.onRequest(slave_on_request);
+    Wire.onReceive(slave_on_receive);
 }
 
-void slave_on_request(){
-    Wire.write(array_angles_X1, 6);
+void print_array(uint8_t (&data)[6]) {
+    Serial.print("[");
+    for (size_t i = 0; i < 6; i++) {
+        Serial.print(data[i]);
+        Serial.print(", ");
+    }
+    Serial.println("]");
+}
+
+void slave_on_receive() {
+    for (size_t i = 0; i < 6; i++) {
+        target_angle[i] = Wire.read();
+    }
+
+    Serial.println("recieved target angles from master: ");
+    print_array(target_angle);
+}
+
+void slave_on_request() {
+    Serial.println("sending current angles to master: ");
+    print_array(current_angle);
+
+    Wire.write(current_angle, 6);
 }
 
 void loop() {
+    arm.setAllAbsolute(target_angle[0], target_angle[1],
+                       target_angle[2], target_angle[3],
+                       target_angle[4], target_angle[5]);
+
     arm.safeDelay(500);
 
+    for (size_t i = 0; i < 6; i++) {
+        current_angle[i] = arm._currentJointPositions[i];
+    }
 }
