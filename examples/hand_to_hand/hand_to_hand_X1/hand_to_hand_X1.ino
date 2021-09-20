@@ -168,7 +168,6 @@ public:
             m6_angle = M6Angle::A10;
 
         } else if (state == GO_DROP && m_is_done) {
-            // pin = 1;
             state = GO_SAFE;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A160;
@@ -178,7 +177,6 @@ public:
             m6_angle = M6Angle::A10;
 
         } else if (state == GO_SAFE && m_is_done) {
-            // pin = 0;
             state = GO_WAIT;
             m1_angle = M1Angle::A0;
             m2_angle = M2Angle::A140;
