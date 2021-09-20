@@ -171,7 +171,7 @@ void loop() {
     } else if (analogRead(PIN_INPUT_TO_Z12) >= 800) {
         want_cargo_on_Z1 = true;
         digitalWrite(PIN_LED_Z0_Z1, HIGH);
-        Serial.println("*** REQUEST: move the cargo to pos Z2 ***");
+        Serial.println("*** REQUEST: move the cargo to pos Z1 ***");
     }
 
     // Z1 and Z2
