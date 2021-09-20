@@ -65,6 +65,8 @@ struct ControllerX1 {
         __SAME__
     } state = BEGIN;
 
+    State next_state = __SAME__;
+
     struct Out {
         /* TODO: initial values */
         AngleBase go_base;
@@ -81,8 +83,6 @@ struct ControllerX1 {
                 bool is_done_m3, bool is_done_m4,
                 bool is_done_m5, bool is_done_m6) {
         bool is_done_all = is_done_m1 && is_done_m2 && is_done_m3 && is_done_m4 && is_done_m5 && is_done_m6;
-
-        State next_state = __SAME__;
 
         if (0) {
         } else if (state == BEGIN) {
@@ -142,7 +142,7 @@ struct ControllerX1 {
         } else if (state == GO_DROP_Z1 && is_done_all) {
             next_state = GO_UP_Z1;
 
-        } else if (state == (GO_UP_Z1 || GO_SAFE_Z01 || GO_UP_Z01 || GO_LOW_Z01) && is_done_all) {
+        } else if ((state == GO_UP_Z1 || state == GO_SAFE_Z01 || state == GO_UP_Z01 || state == GO_LOW_Z01) && is_done_all) {
             next_state = GO_WAIT;
 
         } else if (state == GO_SAFE_PICKUP_Z02 && !cargo_on_Z2 && is_done_all) {
@@ -160,7 +160,7 @@ struct ControllerX1 {
         } else if (state == GO_DROP_Z2 && is_done_all) {
             next_state = GO_UP_Z2;
 
-        } else if (state == (GO_UP_Z2 || GO_SAFE_Z02 || GO_UP_Z02 || GO_LOW_Z02) && is_done_all) {
+        } else if ((state == GO_UP_Z2 || state == GO_SAFE_Z02 || state == GO_UP_Z02 || state == GO_LOW_Z02) && is_done_all) {
             next_state = GO_WAIT;
 
         }
@@ -335,6 +335,7 @@ struct ControllerX1 {
             // do nothing
         }
 
+        state = next_state;
         return out;
     }
 };
