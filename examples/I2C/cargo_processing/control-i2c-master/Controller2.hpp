@@ -59,6 +59,8 @@ struct ControllerX2 {
         __SAME__
     } state = BEGIN;
 
+    State next_state = __SAME__;
+
     struct Out {
         /* TODO: initial values */
         AngleBase go_base;
@@ -74,8 +76,6 @@ struct ControllerX2 {
                 bool is_done_m3, bool is_done_m4,
                 bool is_done_m5, bool is_done_m6) {
         bool is_done_all = is_done_m1 && is_done_m2 && is_done_m3 && is_done_m4 && is_done_m5 && is_done_m6;
-
-        State next_state = __SAME__;
 
         if (0) {
         } else if (state == BEGIN) {
@@ -284,6 +284,7 @@ struct ControllerX2 {
             // do nothing
         }
 
+        state = next_state;
         return out;
     }
 };
