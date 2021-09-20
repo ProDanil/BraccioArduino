@@ -30,7 +30,7 @@ struct ControllerX2 {
         A90 = 90
     };
     enum struct AngleGripper {
-        A10 = 10,
+        A15 = 15,
         A73 = 73
     };
 
@@ -151,7 +151,7 @@ struct ControllerX2 {
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A10;
             out.go_wrist_rot = AngleWristRot::A0;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == WAIT) {
             // do nothing
         } else if (next_state == GO_SAFE_Z1) {
@@ -160,21 +160,21 @@ struct ControllerX2 {
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_UP_Z1) {
             out.go_base = AngleBase::A120;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_LOW_Z1) {
             out.go_base = AngleBase::A120;
             out.go_shoulder = AngleShoulder::A90;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_PICKUP_Z1) {
             out.go_base = AngleBase::A120;
             out.go_shoulder = AngleShoulder::A90;
@@ -202,21 +202,21 @@ struct ControllerX2 {
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_UP_Z2) {
             out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_LOW_Z2) {
             out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A90;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_PICKUP_Z2) {
             out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A90;
@@ -272,14 +272,14 @@ struct ControllerX2 {
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A10;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_UP_Z3) {
             out.go_base = AngleBase::A90;
             out.go_shoulder = AngleShoulder::A115;
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
-            out.go_gripper = AngleGripper::A10;
+            out.go_gripper = AngleGripper::A15;
         } else {
             // do nothing
         }
