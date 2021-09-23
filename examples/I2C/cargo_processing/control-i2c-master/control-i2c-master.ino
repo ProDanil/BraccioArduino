@@ -4,6 +4,14 @@
 #include "Controller2.hpp"
 // #include "Controller3.hpp"
 
+/*Step Delay: a milliseconds delay between the movement of each servo.  Allowed values from 10 to 30 msec.
+  M1 = base degrees from 0 to 180
+  M2 = shoulder degrees from 20 to 160
+  M3 = elbow degrees from 0 to 180
+  M4 = vertical wrist degrees from 0 to 180
+  M5 = rotatory wrist degrees from 0 to 180
+  M6 = gripper degrees from 15 to 80 degrees*/
+
 // Button pins
 #define PIN_INPUT_TO_Z12 A0  // button pins for transverring cargo from Z0 to Z1 or Z2 and reset button
 #define PIN_Z12_TO_OUT A1    // button pins for transverring cargo from Z1 or Z2 to Z3
@@ -174,7 +182,7 @@ void loop() {
         Serial.println("*** REQUEST: move the cargo to pos Z1 ***");
     }
 
-    // Z1 and Z2
+    // Z1 and Z2 processed
     if (analogRead(PIN_Z12_TO_OUT) >= 100 && analogRead(PIN_Z12_TO_OUT) < 700 && cargo_on_Z2) {
         cargo_is_processed_Z2 = true;
         digitalWrite(PIN_LED_PROCESSED_Z2, HIGH);
@@ -182,7 +190,7 @@ void loop() {
 
     } else if (analogRead(PIN_Z12_TO_OUT) >= 700 && cargo_on_Z1) {
         cargo_is_processed_Z1 = true;
-        digitalWrite(PIN_LED_PROCESSED_Z2, HIGH);
+        digitalWrite(PIN_LED_PROCESSED_Z1, HIGH);
         Serial.println("*** The cargo on Z1 is processed! ***");
 
     } /*else if (analogRead(PIN_Z12_TO_OUT) >= 800){
@@ -213,6 +221,27 @@ void loop() {
             is_done_m5, is_done_m6);
 
         // Execute the controller
+//        Serial.print("----contril1(");
+//        Serial.print(want_cargo_on_Z1);
+//        Serial.print(", ");
+//        Serial.print(want_cargo_on_Z2);
+//        Serial.print(", ");
+//        Serial.print(cargo_on_Z1);
+//        Serial.print(", ");
+//        Serial.print(cargo_on_Z2);
+//        Serial.print(", ");
+//        Serial.print(is_done_m1);
+//        Serial.print(", ");
+//        Serial.print(is_done_m2);
+//        Serial.print(", ");
+//        Serial.print(is_done_m3);
+//        Serial.print(", ");
+//        Serial.print(is_done_m4);
+//        Serial.print(", ");
+//        Serial.print(is_done_m5);
+//        Serial.print(", ");
+//        Serial.print(is_done_m6);
+//        Serial.println(")----");
         auto out = control1.go_step(
             want_cargo_on_Z1, want_cargo_on_Z2,
             cargo_on_Z1, cargo_on_Z2,
@@ -260,7 +289,7 @@ void loop() {
     }
 
     // X2
-    /
+    {
         // Read the state of the plant
         read_current_angles(I2C_ADDR_SLAVE_X2, current_angle_X2);
 
@@ -292,11 +321,11 @@ void loop() {
             cargo_on_Z1 = false;
             digitalWrite(PIN_LED_Z1, LOW);
 
-        } else if (control2.state == ControllerX2::GO_UP_PICKUP_Z1) {
+        } else if (control2.state == ControllerX2::GO_UP_PICKUP_Z2) {
             cargo_is_processed_Z2 = false;
             digitalWrite(PIN_LED_PROCESSED_Z2, LOW);
-            cargo_on_Z2 = true;
-            digitalWrite(PIN_LED_Z2, HIGH);
+            cargo_on_Z2 = false;
+            digitalWrite(PIN_LED_Z2, LOW);
         }
 
         // Checking for new target
@@ -318,4 +347,5 @@ void loop() {
             print_out_control(2, target_angle_X2);
         }
     }
+    delay(100);
 }
