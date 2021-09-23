@@ -7,6 +7,7 @@ Braccio arm;
 
 uint8_t target_angle[6];
 uint8_t current_angle[6];
+//long iter;
 
 // Setup was copied from the 'Basic Movement' example of BraccioV2 lib.
 void setup() {
@@ -43,10 +44,16 @@ void setup() {
     //to initialize the power circuitry.
     Serial.println("Initialization Complete");
 
-    // Start position
+     //Start position
     for (size_t i = 0; i < 6; i++) {
         current_angle[i] = arm._currentJointPositions[i];
+        target_angle[i] = arm._currentJointPositions[i];
     }
+//      int tmp[6] = {90,90,90,90,90,50};
+//      for (int i=0; i<6; i++) {
+//        current_angle[i] = tmp[i];
+//        target_angle[i] = tmp[i];
+//      }
 
     Wire.onRequest(slave_on_request);
     Wire.onReceive(slave_on_receive);
@@ -78,6 +85,8 @@ void slave_on_request() {
 }
 
 void loop() {
+    //iter++;
+    //Serial.println(iter);
     arm.setAllAbsolute(target_angle[0], target_angle[1],
                        target_angle[2], target_angle[3],
                        target_angle[4], target_angle[5]);
