@@ -1,6 +1,7 @@
 #ifndef Controller1_hpp
 #define Controller1_hpp
 
+
 struct ControllerX1 {
     enum struct AngleBase {
         A0 = 0,
@@ -67,6 +68,14 @@ struct ControllerX1 {
 
     State next_state = __SAME__;
 
+    struct Input {
+        bool want_cargo_on_Z1; bool want_cargo_on_Z2;
+        bool cargo_on_Z1; bool cargo_on_Z2;
+        bool is_done_m1; bool is_done_m2;
+        bool is_done_m3; bool is_done_m4;
+        bool is_done_m5; bool is_done_m6;
+    };
+
     struct Out {
         /* TODO: initial values */
         AngleBase go_base;
@@ -75,14 +84,12 @@ struct ControllerX1 {
         AngleWristVer go_wrist_ver;
         AngleWristRot go_wrist_rot;
         AngleGripper go_gripper;
+        bool active;
     } out;
 
-    Out go_step(bool want_cargo_on_Z1, bool want_cargo_on_Z2,
-                bool cargo_on_Z1, bool cargo_on_Z2,
-                bool is_done_m1, bool is_done_m2,
-                bool is_done_m3, bool is_done_m4,
-                bool is_done_m5, bool is_done_m6) {
-        bool is_done_all = is_done_m1 && is_done_m2 && is_done_m3 && is_done_m4 && is_done_m5 && is_done_m6;
+    Out go_step(Input input) {
+
+        bool is_done_all = input.is_done_m1 && input.is_done_m2 && input.is_done_m3 && input.is_done_m4 && input.is_done_m5 && input.is_done_m6;
 
         if (0) {
         } else if (state == BEGIN) {
@@ -91,16 +98,16 @@ struct ControllerX1 {
         } else if (state == GO_WAIT && is_done_all) {
             next_state = WAIT;
 
-        } else if (state == WAIT && want_cargo_on_Z1) {
+        } else if (state == WAIT && input.want_cargo_on_Z1) {
             next_state = GO_SAFE_Z01;
 
-        } else if (state == GO_SAFE_Z01 && is_done_all && want_cargo_on_Z1) {
+        } else if (state == GO_SAFE_Z01 && is_done_all && input.want_cargo_on_Z1) {
             next_state = GO_UP_Z01;
 
-        } else if (state == GO_UP_Z01 && is_done_all && want_cargo_on_Z1) {
+        } else if (state == GO_UP_Z01 && is_done_all && input.want_cargo_on_Z1) {
             next_state = GO_LOW_Z01;
 
-        } else if (state == GO_LOW_Z01 && is_done_all && want_cargo_on_Z1) {
+        } else if (state == GO_LOW_Z01 && is_done_all && input.want_cargo_on_Z1) {
             next_state = GO_PICKUP_Z01;
 
         } else if (state == GO_PICKUP_Z01 && is_done_all) {
@@ -109,16 +116,16 @@ struct ControllerX1 {
         } else if (state == GO_UP_PICKUP_Z01 && is_done_all) {
             next_state = GO_SAFE_PICKUP_Z01;
 
-        } else if (state == WAIT && want_cargo_on_Z2) {
+        } else if (state == WAIT && input.want_cargo_on_Z2) {
             next_state = GO_SAFE_Z02;
 
-        } else if (state == GO_SAFE_Z02 && is_done_all && want_cargo_on_Z2) {
+        } else if (state == GO_SAFE_Z02 && is_done_all && input.want_cargo_on_Z2) {
             next_state = GO_UP_Z02;
 
-        } else if (state == GO_UP_Z02 && is_done_all && want_cargo_on_Z2) {
+        } else if (state == GO_UP_Z02 && is_done_all && input.want_cargo_on_Z2) {
             next_state = GO_LOW_Z02;
 
-        } else if (state == GO_LOW_Z02 && is_done_all && want_cargo_on_Z2) {
+        } else if (state == GO_LOW_Z02 && is_done_all && input.want_cargo_on_Z2) {
             next_state = GO_PICKUP_Z02;
 
         } else if (state == GO_PICKUP_Z02 && is_done_all) {
@@ -127,7 +134,7 @@ struct ControllerX1 {
         } else if (state == GO_UP_PICKUP_Z02 && is_done_all) {
             next_state = GO_SAFE_PICKUP_Z02;
 
-        } else if (state == GO_SAFE_PICKUP_Z01 && !cargo_on_Z1 && is_done_all) {
+        } else if (state == GO_SAFE_PICKUP_Z01 && !input.cargo_on_Z1 && is_done_all) {
             next_state = GO_SAFE_Z1;
 
         } else if (state == GO_SAFE_Z1 && is_done_all) {
@@ -145,7 +152,7 @@ struct ControllerX1 {
         } else if ((state == GO_UP_Z1 || state == GO_SAFE_Z01 || state == GO_UP_Z01 || state == GO_LOW_Z01) && is_done_all) {
             next_state = GO_WAIT;
 
-        } else if (state == GO_SAFE_PICKUP_Z02 && !cargo_on_Z2 && is_done_all) {
+        } else if (state == GO_SAFE_PICKUP_Z02 && !input.cargo_on_Z2 && is_done_all) {
             next_state = GO_SAFE_Z2;
 
         } else if (state == GO_SAFE_Z2 && is_done_all) {
@@ -335,6 +342,11 @@ struct ControllerX1 {
             // do nothing
         }
 
+        if (state == next_state){
+            out.active = false;
+        } else {
+            out.active = true;
+        }
         state = next_state;
         return out;
     }
