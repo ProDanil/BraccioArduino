@@ -61,6 +61,13 @@ struct ControllerX2 {
 
     State next_state = __SAME__;
 
+    struct Input {
+        bool cargo_is_processed_Z1; bool cargo_is_processed_Z2;
+        bool is_done_m1; bool is_done_m2;
+        bool is_done_m3; bool is_done_m4;
+        bool is_done_m5; bool is_done_m6;
+    } input;
+
     struct Out {
         /* TODO: initial values */
         AngleBase go_base;
@@ -69,13 +76,11 @@ struct ControllerX2 {
         AngleWristVer go_wrist_ver;
         AngleWristRot go_wrist_rot;
         AngleGripper go_gripper;
+        bool active;
     } out;
 
-    Out go_step(bool cargo_is_processed_Z1, bool cargo_is_processed_Z2,
-                bool is_done_m1, bool is_done_m2,
-                bool is_done_m3, bool is_done_m4,
-                bool is_done_m5, bool is_done_m6) {
-        bool is_done_all = is_done_m1 && is_done_m2 && is_done_m3 && is_done_m4 && is_done_m5 && is_done_m6;
+    Out go_step(Input input) {
+        bool is_done_all = input.is_done_m1 && input.is_done_m2 && input.is_done_m3 && input.is_done_m4 && input.is_done_m5 && input.is_done_m6;
 
         if (0) {
         } else if (state == BEGIN) {
@@ -84,7 +89,7 @@ struct ControllerX2 {
         } else if (state == GO_WAIT && is_done_all) {
             next_state = WAIT;
 
-        } else if (state == WAIT && cargo_is_processed_Z1 /* && Z1_done != 3 */) {
+        } else if (state == WAIT && input.cargo_is_processed_Z1 /* && Z1_done != 3 */) {
             next_state = GO_SAFE_Z1;
 
         } else if (state == GO_SAFE_Z1 && is_done_all) {
@@ -102,7 +107,7 @@ struct ControllerX2 {
         } else if (state == GO_UP_PICKUP_Z1 && is_done_all) {
             next_state = GO_SAFE_PICKUP_Z1;
 
-        } else if (state == WAIT && cargo_is_processed_Z2) {
+        } else if (state == WAIT && input.cargo_is_processed_Z2) {
             next_state = GO_SAFE_Z2;
 
         } else if (state == GO_SAFE_Z2 && is_done_all) {
@@ -284,6 +289,11 @@ struct ControllerX2 {
             // do nothing
         }
 
+        if (state == next_state){
+            out.active = false;
+        } else {
+            out.active = true;
+        }
         state = next_state;
         return out;
     }
