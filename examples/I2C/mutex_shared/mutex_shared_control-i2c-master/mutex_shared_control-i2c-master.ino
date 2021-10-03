@@ -10,7 +10,7 @@
 #include "Controller3.hpp"
 
 #define DEBUG_LOG
-//#define DEBUG_MESSAGE
+#define DEBUG_MESSAGE
 
 #ifdef DEBUG_LOG
 #define LOG(mess) Serial.print(mess)
@@ -24,7 +24,13 @@
 #define MESSAGE(mess)
 #endif
 
-#define OUT_LAMP_PIN 3    // лампа - выходной сигнал с mutex
+#define INPUT_X1_PIN A0   // input signal about cargo on Z1
+#define INPUT_X2_PIN A1
+#define INPUT_X3_PIN A2
+#define LAMP_X1_PIN 2
+#define LAMP_X2_PIN 3
+#define LAMP_X3_PIN 4
+#define MUTEX_LAMP_PIN 5
 
 // I2C slave addresses
 #define I2C_ADDR_SLAVE_X1 11
@@ -51,18 +57,32 @@ uint8_t target_angle_X1[6];
 uint8_t target_angle_X2[6];
 uint8_t target_angle_X3[6];
 
+bool printed_done[3] = {false, false, false};
 bool cargo_on_Z1;
 bool cargo_on_Z2;
 bool cargo_on_Z3;
+bool is_prev_passive_X1;
+bool is_prev_passive_X2;
+bool is_prev_passive_X3;
 
+unsigned long timing;
 unsigned iter = 0;
 
 
 void setup() {
     Wire.begin();  // begin as master
     Serial.begin(115200);
-    pinMode(OUT_LAMP_PIN, OUTPUT);
-    digitalWrite(OUT_LAMP_PIN, LOW);
+    pinMode(INPUT_X1_PIN, INPUT);
+    pinMode(INPUT_X2_PIN, INPUT);
+    pinMode(INPUT_X3_PIN, INPUT);
+    pinMode(LAMP_X1_PIN, OUTPUT);
+    pinMode(LAMP_X2_PIN, OUTPUT);
+    pinMode(LAMP_X3_PIN, OUTPUT);
+    pinMode(MUTEX_LAMP_PIN, OUTPUT);
+    digitalWrite(LAMP_X1_PIN, LOW);
+    digitalWrite(LAMP_X2_PIN, LOW);
+    digitalWrite(LAMP_X3_PIN, LOW);
+    digitalWrite(MUTEX_LAMP_PIN, LOW);
 }
 
 struct Mutex {
@@ -169,17 +189,58 @@ void print_array(uint8_t (&data)[6]) {
     Serial.println("]");
 }
 
-void read_current_angles(int slave_address,
-                         uint8_t (&current_angle)[6],
-                         bool &cargo_on) {
-    Wire.requestFrom(slave_address, 8);
-    for (size_t i = 0; i < 7; i++) {
-        if (i < 6){
-            current_angle[i] = Wire.read();
-        } else {
-            cargo_on = Wire.read();
+void  print_input_control(
+        int controller,
+        uint8_t current_angle[6],
+        bool want_cargo_on_out, bool is_acquired,
+        bool is_done_m1, bool is_done_m2,
+        bool is_done_m3, bool is_done_m4,
+        bool is_done_m5, bool is_done_m6){
+    bool all_is_done = is_done_m1 && is_done_m2 && is_done_m3 && is_done_m4 && is_done_m5 && is_done_m6;
+    if (!all_is_done){
+        printed_done[controller-1] = false;
+        if (millis() - timing > TIMER){
+            timing = millis();
+            Serial.print("     INPUTS CONTROLLER");
+            Serial.println(controller);
+
+            Serial.println("Want cargo on out: "+String(want_cargo_on_out));
+            Serial.println("is acquired: "+String(is_acquired));
+
+            Serial.print("Current angles: (");
+            Serial.print(String(current_angle[0]) +", "+ String(current_angle[1]) +", "+
+                         String(current_angle[2]) +", "+ String(current_angle[3]) +", "+
+                         String(current_angle[4]) +", "+ String(current_angle[5]));
+            Serial.println(")");
+
+            Serial.println("[M1.done] "+ String(is_done_m1) +" [M2.done] "+ String(is_done_m2) +
+                          " [M3.done] "+ String(is_done_m3) +" [M4.done] "+ String(is_done_m4) +
+                          " [M5.done] "+ String(is_done_m5) +" [M6.done] "+ String(is_done_m6));
         }
 
+    } else if ((controller == 1 && !printed_done[0]) || (controller == 2 && !printed_done[1])
+            || (controller == 3 && !printed_done[2])){
+        Serial.println("[M1.done] "+ String(is_done_m1) +" [M2.done] "+ String(is_done_m2) +
+                      " [M3.done] "+ String(is_done_m3) +" [M4.done] "+ String(is_done_m4) +
+                      " [M5.done] "+ String(is_done_m5) +" [M6.done] "+ String(is_done_m6));
+        printed_done[controller-1] = true;
+    }
+
+}
+
+void print_out_control(int controller, uint8_t target_angle[6]){
+    Serial.print("     OUTPUTS CONTROLLER");
+    Serial.println(controller);
+    Serial.print("Target angles: (");
+    Serial.print(String(target_angle[0]) +", "+ String(target_angle[1]) +", "+ String(target_angle[2]) +", "+
+    String(target_angle[3]) +", "+ String(target_angle[4]) +", "+ String(target_angle[5]));
+    Serial.println(")");
+}
+
+void read_current_angles(int slave_address, uint8_t (&current_angle)[6]) {
+    Wire.requestFrom(slave_address, 6);
+    for (size_t i = 0; i < 6; i++) {
+        current_angle[i] = Wire.read();
     }
 
     Serial.print("recieved current angles from ");
@@ -203,63 +264,277 @@ void send_target_angles(int slave_address, uint8_t (&target_angle)[6]) {
 void loop() {
     iter++;
 
-    read_current_angles(I2C_ADDR_SLAVE_X1, current_angle_X1, cargo_on_Z1);
+    // Read buttons
+    if (analogRead(INPUT_X1_PIN) >= 100 && analogRead(INPUT_X1_PIN) < 700) {
+        input_X1.want_cargo_on_out = false;
+        digitalWrite(LAMP_X1_PIN, LOW);
+        MESSAGE("*** The cargo is removed from Z1 pos ***");
+    } else if (analogRead(INPUT_X1_PIN) >= 700) {
+        input_X1.want_cargo_on_out = true;
+        digitalWrite(LAMP_X1_PIN, HIGH);
+        MESSAGE("*** The cargo on Z1 pos ***");
+    }
+
+    if (analogRead(INPUT_X2_PIN) >= 100 && analogRead(INPUT_X2_PIN) < 700) {
+        input_X2.want_cargo_on_out = false;
+        digitalWrite(LAMP_X2_PIN, LOW);
+        MESSAGE("*** The cargo is removed from Z2 pos ***");
+    } else if (analogRead(INPUT_X2_PIN) >= 700) {
+        input_X2.want_cargo_on_out = true;
+        digitalWrite(LAMP_X2_PIN, HIGH);
+        MESSAGE("*** The cargo on Z2 pos ***");
+    }
+
+    if (analogRead(INPUT_X3_PIN) >= 100 && analogRead(INPUT_X3_PIN) < 700) {
+        input_X3.want_cargo_on_out = false;
+        digitalWrite(LAMP_X3_PIN, LOW);
+        MESSAGE("*** The cargo is removed from Z3 pos ***");
+    } else if (analogRead(INPUT_X3_PIN) >= 700) {
+        input_X3.want_cargo_on_out = true;
+        digitalWrite(LAMP_X3_PIN, HIGH);
+        MESSAGE("*** The cargo on Z3 pos ***");
+    }
+
+    read_current_angles(I2C_ADDR_SLAVE_X1, current_angle_X1);
     input_X1.is_done_m1 = (current_angle_X1[0] == target_angle_X1[0]);
     input_X1.is_done_m2 = (current_angle_X1[1] == target_angle_X1[1]);
     input_X1.is_done_m3 = (current_angle_X1[2] == target_angle_X1[2]);
     input_X1.is_done_m4 = (current_angle_X1[3] == target_angle_X1[3]);
     input_X1.is_done_m5 = (current_angle_X1[4] == target_angle_X1[4]);
     input_X1.is_done_m6 = (current_angle_X1[5] == target_angle_X1[5]);
-    input_X1.want_cargo_on_out = cargo_on_Z1;
 
-    // Execute the controller
+    // Print inputs controller 1
+    #ifdef DEBUG_MESSAGE
+        print_input_control(
+            1, current_angle_X1,
+            input_X1.want_cargo_on_out, input_X1.is_acquired,
+            input_X1.is_done_m1, input_X1.is_done_m2,
+            input_X1.is_done_m3, input_X1.is_done_m4,
+            input_X1.is_done_m5, input_X1.is_done_m6);
+    #endif
+
+    // Execute the controllers
         auto out_X1 = control1.go_step(input_X1);
 
-    read_current_angles(I2C_ADDR_SLAVE_X2, current_angle_X2, cargo_on_Z2);
+    bool is_same_input_X1 = (input_X1.want_cargo_on_out == prev_input_X1.want_cargo_on_out &&
+                             input_X1.is_acquired == prev_input_X1.is_acquired &&
+                             input_X1.is_done_m1 == prev_input_X1.is_done_m1 &&
+                             input_X1.is_done_m2 == prev_input_X1.is_done_m2 &&
+                             input_X1.is_done_m3 == prev_input_X1.is_done_m3 &&
+                             input_X1.is_done_m4 == prev_input_X1.is_done_m4 &&
+                             input_X1.is_done_m5 == prev_input_X1.is_done_m5 &&
+                             input_X1.is_done_m6 == prev_input_X1.is_done_m6);
+
+    if ((bool)out_X1.active || !is_prev_passive_X1 || !is_same_input_X1){
+        is_prev_passive_X1 = false;
+        LOG("[iter # "+String(iter)+"] ");
+        LOG("CONTROLLER_1 ");
+        LOG("want_cargo_on_out="+String(input_X1.want_cargo_on_out)+" ");
+        LOG("is_acquired="+String(input_X1.is_acquired)+" ");
+        LOG("is_done_m1="+String(input_X1.is_done_m1)+" ");
+        LOG("is_done_m2="+String(input_X1.is_done_m2)+" ");
+        LOG("is_done_m3="+String(input_X1.is_done_m3)+" ");
+        LOG("is_done_m4="+String(input_X1.is_done_m4)+" ");
+        LOG("is_done_m5="+String(input_X1.is_done_m5)+" ");
+        LOG("is_done_m6="+String(input_X1.is_done_m6));
+        LOG("\n");
+    }
+    if (!(bool)out_X1.active && !is_prev_passive_X1){
+        is_prev_passive_X1 = true;
+        LOG("[iter # "+String(iter)+"] ");
+        LOG("CONTROLLER_1 ");
+        LOG("want_cargo_on_out="+String(input_X1.want_cargo_on_out)+" ");
+        LOG("is_acquired="+String(input_X1.is_acquired)+" ");
+        LOG("is_done_m1="+String(input_X1.is_done_m1)+" ");
+        LOG("is_done_m2="+String(input_X1.is_done_m2)+" ");
+        LOG("is_done_m3="+String(input_X1.is_done_m3)+" ");
+        LOG("is_done_m4="+String(input_X1.is_done_m4)+" ");
+        LOG("is_done_m5="+String(input_X1.is_done_m5)+" ");
+        LOG("is_done_m6="+String(input_X1.is_done_m6));
+        LOG("\n");
+    }
+
+    prev_input_X1.want_cargo_on_out = input_X1.want_cargo_on_out;
+    prev_input_X1.is_acquired = input_X1.is_acquired;
+    prev_input_X1.is_done_m1 = input_X1.is_done_m1;
+    prev_input_X1.is_done_m2 = input_X1.is_done_m2;
+    prev_input_X1.is_done_m3 = input_X1.is_done_m3;
+    prev_input_X1.is_done_m4 = input_X1.is_done_m4;
+    prev_input_X1.is_done_m5 = input_X1.is_done_m5;
+    prev_input_X1.is_done_m6 = input_X1.is_done_m6;
+
+    if (control1.state == ControllerX1::GO_UP_PICKUP_Z0) {
+        input_X1.want_cargo_on_out = false;
+        digitalWrite(LAMP_X1_PIN, LOW);
+        MESSAGE("*** The cargo pickuped from Z1 pos ***");
+    }
+
+    read_current_angles(I2C_ADDR_SLAVE_X2, current_angle_X2);
     input_X2.is_done_m1 = (current_angle_X2[0] == target_angle_X2[0]);
     input_X2.is_done_m2 = (current_angle_X2[1] == target_angle_X2[1]);
     input_X2.is_done_m3 = (current_angle_X2[2] == target_angle_X2[2]);
     input_X2.is_done_m4 = (current_angle_X2[3] == target_angle_X2[3]);
     input_X2.is_done_m5 = (current_angle_X2[4] == target_angle_X2[4]);
     input_X2.is_done_m6 = (current_angle_X2[5] == target_angle_X2[5]);
-    input_X2.want_cargo_on_out = cargo_on_Z2;
 
-    // Execute the controller
+    // Print inputs controller 2
+    #ifdef DEBUG_MESSAGE
+        print_input_control(
+            2, current_angle_X2,
+            input_X2.want_cargo_on_out, input_X2.is_acquired,
+            input_X2.is_done_m1, input_X2.is_done_m2,
+            input_X2.is_done_m3, input_X2.is_done_m4,
+            input_X2.is_done_m5, input_X2.is_done_m6);
+    #endif
+
         auto out_X2 = control2.go_step(input_X2);
 
-    read_current_angles(I2C_ADDR_SLAVE_X3, current_angle_X3, cargo_on_Z3);
+    bool is_same_input_X2 = (input_X2.want_cargo_on_out == prev_input_X2.want_cargo_on_out &&
+                             input_X2.is_acquired == prev_input_X2.is_acquired &&
+                             input_X2.is_done_m1 == prev_input_X2.is_done_m1 &&
+                             input_X2.is_done_m2 == prev_input_X2.is_done_m2 &&
+                             input_X2.is_done_m3 == prev_input_X2.is_done_m3 &&
+                             input_X2.is_done_m4 == prev_input_X2.is_done_m4 &&
+                             input_X2.is_done_m5 == prev_input_X2.is_done_m5 &&
+                             input_X2.is_done_m6 == prev_input_X2.is_done_m6);
+
+    if ((bool)out_X2.active || !is_prev_passive_X2 || !is_same_input_X2){
+        is_prev_passive_X2 = false;
+        LOG("[iter # "+String(iter)+"] ");
+        LOG("CONTROLLER_1 ");
+        LOG("want_cargo_on_out="+String(input_X2.want_cargo_on_out)+" ");
+        LOG("is_acquired="+String(input_X2.is_acquired)+" ");
+        LOG("is_done_m1="+String(input_X2.is_done_m1)+" ");
+        LOG("is_done_m2="+String(input_X2.is_done_m2)+" ");
+        LOG("is_done_m3="+String(input_X2.is_done_m3)+" ");
+        LOG("is_done_m4="+String(input_X2.is_done_m4)+" ");
+        LOG("is_done_m5="+String(input_X2.is_done_m5)+" ");
+        LOG("is_done_m6="+String(input_X2.is_done_m6));
+        LOG("\n");
+    }
+    if (!(bool)out_X2.active && !is_prev_passive_X2){
+        is_prev_passive_X2 = true;
+        LOG("[iter # "+String(iter)+"] ");
+        LOG("CONTROLLER_1 ");
+        LOG("want_cargo_on_out="+String(input_X2.want_cargo_on_out)+" ");
+        LOG("is_acquired="+String(input_X2.is_acquired)+" ");
+        LOG("is_done_m1="+String(input_X2.is_done_m1)+" ");
+        LOG("is_done_m2="+String(input_X2.is_done_m2)+" ");
+        LOG("is_done_m3="+String(input_X2.is_done_m3)+" ");
+        LOG("is_done_m4="+String(input_X2.is_done_m4)+" ");
+        LOG("is_done_m5="+String(input_X2.is_done_m5)+" ");
+        LOG("is_done_m6="+String(input_X2.is_done_m6));
+        LOG("\n");
+    }
+
+    prev_input_X2.want_cargo_on_out = input_X2.want_cargo_on_out;
+    prev_input_X2.is_acquired = input_X2.is_acquired;
+    prev_input_X2.is_done_m1 = input_X2.is_done_m1;
+    prev_input_X2.is_done_m2 = input_X2.is_done_m2;
+    prev_input_X2.is_done_m3 = input_X2.is_done_m3;
+    prev_input_X2.is_done_m4 = input_X2.is_done_m4;
+    prev_input_X2.is_done_m5 = input_X2.is_done_m5;
+    prev_input_X2.is_done_m6 = input_X2.is_done_m6;
+
+    if (control2.state == ControllerX2::GO_UP_PICKUP_Z0) {
+        input_X2.want_cargo_on_out = false;
+        digitalWrite(LAMP_X2_PIN, LOW);
+        MESSAGE("*** The cargo pickuped from Z2 pos ***");
+    }
+
+    read_current_angles(I2C_ADDR_SLAVE_X3, current_angle_X3);
     input_X3.is_done_m1 = (current_angle_X3[0] == target_angle_X3[0]);
     input_X3.is_done_m2 = (current_angle_X3[1] == target_angle_X3[1]);
     input_X3.is_done_m3 = (current_angle_X3[2] == target_angle_X3[2]);
     input_X3.is_done_m4 = (current_angle_X3[3] == target_angle_X3[3]);
     input_X3.is_done_m5 = (current_angle_X3[4] == target_angle_X3[4]);
     input_X3.is_done_m6 = (current_angle_X3[5] == target_angle_X3[5]);
-    input_X3.want_cargo_on_out = cargo_on_Z3;
 
-    // Execute the controller
+    // Print inputs controller 3
+    #ifdef DEBUG_MESSAGE
+        print_input_control(
+            3, current_angle_X3,
+            input_X3.want_cargo_on_out, input_X3.is_acquired,
+            input_X3.is_done_m1, input_X3.is_done_m2,
+            input_X3.is_done_m3, input_X3.is_done_m4,
+            input_X3.is_done_m5, input_X3.is_done_m6);
+    #endif
+
         auto out_X3 = control3.go_step(input_X3);
+
+    bool is_same_input_X3 = (input_X3.want_cargo_on_out == prev_input_X3.want_cargo_on_out &&
+                             input_X3.is_acquired == prev_input_X3.is_acquired &&
+                             input_X3.is_done_m1 == prev_input_X3.is_done_m1 &&
+                             input_X3.is_done_m2 == prev_input_X3.is_done_m2 &&
+                             input_X3.is_done_m3 == prev_input_X3.is_done_m3 &&
+                             input_X3.is_done_m4 == prev_input_X3.is_done_m4 &&
+                             input_X3.is_done_m5 == prev_input_X3.is_done_m5 &&
+                             input_X3.is_done_m6 == prev_input_X3.is_done_m6);
+
+    if ((bool)out_X3.active || !is_prev_passive_X3 || !is_same_input_X3){
+        is_prev_passive_X3 = false;
+        LOG("[iter # "+String(iter)+"] ");
+        LOG("CONTROLLER_1 ");
+        LOG("want_cargo_on_out="+String(input_X3.want_cargo_on_out)+" ");
+        LOG("is_acquired="+String(input_X3.is_acquired)+" ");
+        LOG("is_done_m1="+String(input_X3.is_done_m1)+" ");
+        LOG("is_done_m2="+String(input_X3.is_done_m2)+" ");
+        LOG("is_done_m3="+String(input_X3.is_done_m3)+" ");
+        LOG("is_done_m4="+String(input_X3.is_done_m4)+" ");
+        LOG("is_done_m5="+String(input_X3.is_done_m5)+" ");
+        LOG("is_done_m6="+String(input_X3.is_done_m6));
+        LOG("\n");
+    }
+    if (!(bool)out_X3.active && !is_prev_passive_X3){
+        is_prev_passive_X3 = true;
+        LOG("[iter # "+String(iter)+"] ");
+        LOG("CONTROLLER_1 ");
+        LOG("want_cargo_on_out="+String(input_X3.want_cargo_on_out)+" ");
+        LOG("is_acquired="+String(input_X3.is_acquired)+" ");
+        LOG("is_done_m1="+String(input_X3.is_done_m1)+" ");
+        LOG("is_done_m2="+String(input_X3.is_done_m2)+" ");
+        LOG("is_done_m3="+String(input_X3.is_done_m3)+" ");
+        LOG("is_done_m4="+String(input_X3.is_done_m4)+" ");
+        LOG("is_done_m5="+String(input_X3.is_done_m5)+" ");
+        LOG("is_done_m6="+String(input_X3.is_done_m6));
+        LOG("\n");
+    }
+
+    prev_input_X3.want_cargo_on_out = input_X3.want_cargo_on_out;
+    prev_input_X3.is_acquired = input_X3.is_acquired;
+    prev_input_X3.is_done_m1 = input_X3.is_done_m1;
+    prev_input_X3.is_done_m2 = input_X3.is_done_m2;
+    prev_input_X3.is_done_m3 = input_X3.is_done_m3;
+    prev_input_X3.is_done_m4 = input_X3.is_done_m4;
+    prev_input_X3.is_done_m5 = input_X3.is_done_m5;
+    prev_input_X3.is_done_m6 = input_X3.is_done_m6;
+
+    if (control3.state == ControllerX3::GO_UP_PICKUP_Z0) {
+        input_X3.want_cargo_on_out = false;
+        digitalWrite(LAMP_X3_PIN, LOW);
+        MESSAGE("*** The cargo pickuped from Z3 pos ***");
+    }
 
     
     // Mutex release
 
     if (out_X1.want_to_release && mutex.acquired == 1){
-        // Serial.println(analogRead(RELEASE_X1_PIN));
-        MESSAGE("X1 released");
-        digitalWrite(OUT_LAMP_PIN, LOW);
+        MESSAGE("*** X1 released ***");
+        digitalWrite(MUTEX_LAMP_PIN, LOW);
         input_X1.is_acquired = false;
         mutex.release();
     }
 
     if (out_X2.want_to_release && mutex.acquired == 2){
-        MESSAGE("X2 released");
-        digitalWrite(OUT_LAMP_PIN, LOW);
+        MESSAGE("*** X2 released ***");
+        digitalWrite(MUTEX_LAMP_PIN, LOW);
         input_X2.is_acquired = false;
         mutex.release();
     }
 
     if (out_X3.want_to_release && mutex.acquired == 3){
-        MESSAGE("X3 released");
-        digitalWrite(OUT_LAMP_PIN, LOW);
+        MESSAGE("*** X3 released ***");
+        digitalWrite(MUTEX_LAMP_PIN, LOW);
         input_X3.is_acquired = false;
         mutex.release();
     }
@@ -271,14 +546,22 @@ void loop() {
 
     if (mutex.acquired == 1){
         input_X1.is_acquired = true;
-        digitalWrite(OUT_LAMP_PIN, HIGH);
+        digitalWrite(MUTEX_LAMP_PIN, HIGH);
+        MESSAGE("*** X1 is acquired ***");
     } else if (mutex.acquired == 2){
         input_X2.is_acquired = true;
-        digitalWrite(OUT_LAMP_PIN, HIGH); 
+        digitalWrite(MUTEX_LAMP_PIN, HIGH);
+        MESSAGE("*** X2 is acquired ***");
     } else if (mutex.acquired == 3){
         input_X3.is_acquired = true;
-        digitalWrite(OUT_LAMP_PIN, HIGH);
+        digitalWrite(MUTEX_LAMP_PIN, HIGH);
+        MESSAGE("*** X3 is acquired ***");
     }
+
+    // Checking for new target
+    bool new_target = target_angle_X1[0] == (int)out_X1.go_base && target_angle_X1[1] == (int)out_X1.go_shoulder &&
+                      target_angle_X1[2] == (int)out_X1.go_elbow && target_angle_X1[3] == (int)out_X1.go_wrist_ver &&
+                      target_angle_X1[4] == (int)out_X1.go_wrist_rot && target_angle_X1[5] == (int)out_X1.go_gripper;
 
     // Send controls to the plant
     target_angle_X1[0] = (int)out_X1.go_base;
@@ -289,6 +572,18 @@ void loop() {
     target_angle_X1[5] = (int)out_X1.go_gripper;
     send_target_angles(I2C_ADDR_SLAVE_X1, target_angle_X1);
 
+    // Print out controller 1
+    #ifdef DEBUG_MESSAGE
+        if (new_target){
+            print_out_control(1, target_angle_X1);
+        }
+    #endif
+
+    // Checking for new target
+    new_target = target_angle_X2[0] == (int)out_X2.go_base && target_angle_X2[1] == (int)out_X2.go_shoulder &&
+                 target_angle_X2[2] == (int)out_X2.go_elbow && target_angle_X2[3] == (int)out_X2.go_wrist_ver &&
+                 target_angle_X2[4] == (int)out_X2.go_wrist_rot && target_angle_X2[5] == (int)out_X2.go_gripper;
+
     target_angle_X2[0] = (int)out_X2.go_base;
     target_angle_X2[1] = (int)out_X2.go_shoulder;
     target_angle_X2[2] = (int)out_X2.go_elbow;
@@ -297,6 +592,18 @@ void loop() {
     target_angle_X2[5] = (int)out_X2.go_gripper;
     send_target_angles(I2C_ADDR_SLAVE_X2, target_angle_X2);
 
+    // Print out controller 2
+    #ifdef DEBUG_MESSAGE
+        if (new_target){
+            print_out_control(2, target_angle_X2);
+        }
+    #endif
+
+    // Checking for new target
+    new_target = target_angle_X3[0] == (int)out_X3.go_base && target_angle_X3[1] == (int)out_X3.go_shoulder &&
+                 target_angle_X3[2] == (int)out_X3.go_elbow && target_angle_X3[3] == (int)out_X3.go_wrist_ver &&
+                 target_angle_X3[4] == (int)out_X3.go_wrist_rot && target_angle_X3[5] == (int)out_X3.go_gripper;
+
     target_angle_X3[0] = (int)out_X3.go_base;
     target_angle_X3[1] = (int)out_X3.go_shoulder;
     target_angle_X3[2] = (int)out_X3.go_elbow;
@@ -304,4 +611,13 @@ void loop() {
     target_angle_X3[4] = (int)out_X3.go_wrist_rot;
     target_angle_X3[5] = (int)out_X3.go_gripper;
     send_target_angles(I2C_ADDR_SLAVE_X3, target_angle_X3);
+
+    // Print out controller 3
+    #ifdef DEBUG_MESSAGE
+        if (new_target){
+            print_out_control(3, target_angle_X3);
+        }
+    #endif
+
+    delay(100);
 }
