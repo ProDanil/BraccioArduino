@@ -71,7 +71,7 @@ unsigned iter = 0;
 
 void setup() {
     Wire.begin();  // begin as master
-    Serial.begin(115200);
+    Serial.begin(9600);
     pinMode(INPUT_X1_PIN, INPUT);
     pinMode(INPUT_X2_PIN, INPUT);
     pinMode(INPUT_X3_PIN, INPUT);
@@ -401,7 +401,7 @@ void loop() {
     if ((bool)out_X2.active || !is_prev_passive_X2 || !is_same_input_X2){
         is_prev_passive_X2 = false;
         LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_1 ");
+        LOG("CONTROLLER_2 ");
         LOG("want_cargo_on_out="+String(input_X2.want_cargo_on_out)+" ");
         LOG("is_acquired="+String(input_X2.is_acquired)+" ");
         LOG("is_done_m1="+String(input_X2.is_done_m1)+" ");
@@ -415,7 +415,7 @@ void loop() {
     if (!(bool)out_X2.active && !is_prev_passive_X2){
         is_prev_passive_X2 = true;
         LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_1 ");
+        LOG("CONTROLLER_2 ");
         LOG("want_cargo_on_out="+String(input_X2.want_cargo_on_out)+" ");
         LOG("is_acquired="+String(input_X2.is_acquired)+" ");
         LOG("is_done_m1="+String(input_X2.is_done_m1)+" ");
@@ -474,7 +474,7 @@ void loop() {
     if ((bool)out_X3.active || !is_prev_passive_X3 || !is_same_input_X3){
         is_prev_passive_X3 = false;
         LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_1 ");
+        LOG("CONTROLLER_3 ");
         LOG("want_cargo_on_out="+String(input_X3.want_cargo_on_out)+" ");
         LOG("is_acquired="+String(input_X3.is_acquired)+" ");
         LOG("is_done_m1="+String(input_X3.is_done_m1)+" ");
@@ -488,7 +488,7 @@ void loop() {
     if (!(bool)out_X3.active && !is_prev_passive_X3){
         is_prev_passive_X3 = true;
         LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_1 ");
+        LOG("CONTROLLER_3 ");
         LOG("want_cargo_on_out="+String(input_X3.want_cargo_on_out)+" ");
         LOG("is_acquired="+String(input_X3.is_acquired)+" ");
         LOG("is_done_m1="+String(input_X3.is_done_m1)+" ");
