@@ -1,1 +1,1 @@
-
+This example uses one arduino master and three slaves. Master receives signals from buttons and current angels from three manipulators. There is mutex that calculates a order of cargo transfer in the master. Slaves receive target angels from master and move braccio.
