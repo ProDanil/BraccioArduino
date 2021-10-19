@@ -10,13 +10,13 @@
 #include "Controller3.hpp"
 
 #define DEBUG_LOG
-#define DEBUG_MESSAGE
+//#define DEBUG_MESSAGE
 
-#ifdef DEBUG_LOG
-#define LOG(mess) Serial.print(mess)
-#else
-#define LOG(mess)
-#endif
+// #ifdef DEBUG_LOG
+// #define LOG(mess) Serial.print(mess)
+// #else
+// #define LOG(mess)
+// #endif
 
 #ifdef DEBUG_MESSAGE
 #define MESSAGE(mess) Serial.print(mess)
@@ -30,7 +30,7 @@
 #define LAMP_X1_PIN 2
 #define LAMP_X2_PIN 3
 #define LAMP_X3_PIN 4
-#define MUTEX_LAMP_PIN 5
+#define MUTEX_LAMP_PIN 13
 
 // I2C slave addresses
 #define I2C_ADDR_SLAVE_X1 11
@@ -260,6 +260,26 @@ void send_target_angles(int slave_address, uint8_t (&target_angle)[6]) {
     Wire.endTransmission();
 }
 
+void log_everything(int control,
+                    bool want_cargo_on_out,
+                    bool is_acquired,
+                    bool is_done_m1, bool is_done_m2,
+                    bool is_done_m3, bool is_done_m4,
+                    bool is_done_m5, bool is_done_m6,
+                    String state){
+    Serial.print("[iter # "+String(iter)+"] ");
+    Serial.print("CONTROLLER_"+String(control)+" ");
+    Serial.print("want_cargo_on_out="+String(want_cargo_on_out)+" ");
+    Serial.print("is_acquired="+String(is_acquired)+" ");
+    Serial.print("is_done_m1="+String(is_done_m1)+" ");
+    Serial.print("is_done_m2="+String(is_done_m2)+" ");
+    Serial.print("is_done_m3="+String(is_done_m3)+" ");
+    Serial.print("is_done_m4="+String(is_done_m4)+" ");
+    Serial.print("is_done_m5="+String(is_done_m5)+" ");
+    Serial.print("is_done_m6="+String(is_done_m6));
+    Serial.println(" state="+state);
+}
+
 
 void loop() {
     iter++;
@@ -316,7 +336,9 @@ void loop() {
     // Execute the controllers
         auto out_X1 = control1.go_step(input_X1);
 
-    bool is_same_input_X1 = (input_X1.want_cargo_on_out == prev_input_X1.want_cargo_on_out &&
+    #ifdef DEBUG_LOG
+    bool is_active = (bool)out_X1.active;
+    bool is_same_input = (input_X1.want_cargo_on_out == prev_input_X1.want_cargo_on_out &&
                              input_X1.is_acquired == prev_input_X1.is_acquired &&
                              input_X1.is_done_m1 == prev_input_X1.is_done_m1 &&
                              input_X1.is_done_m2 == prev_input_X1.is_done_m2 &&
@@ -325,33 +347,18 @@ void loop() {
                              input_X1.is_done_m5 == prev_input_X1.is_done_m5 &&
                              input_X1.is_done_m6 == prev_input_X1.is_done_m6);
 
-    if ((bool)out_X1.active || !is_prev_passive_X1 || !is_same_input_X1){
-        is_prev_passive_X1 = false;
-        LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_1 ");
-        LOG("want_cargo_on_out="+String(input_X1.want_cargo_on_out)+" ");
-        LOG("is_acquired="+String(input_X1.is_acquired)+" ");
-        LOG("is_done_m1="+String(input_X1.is_done_m1)+" ");
-        LOG("is_done_m2="+String(input_X1.is_done_m2)+" ");
-        LOG("is_done_m3="+String(input_X1.is_done_m3)+" ");
-        LOG("is_done_m4="+String(input_X1.is_done_m4)+" ");
-        LOG("is_done_m5="+String(input_X1.is_done_m5)+" ");
-        LOG("is_done_m6="+String(input_X1.is_done_m6));
-        LOG("\n");
-    }
-    if (!(bool)out_X1.active && !is_prev_passive_X1){
+    if (is_active || !is_same_input || !is_prev_passive_X1) {
+        if (is_active){
+            is_prev_passive_X1 = false;
+        }
+        log_everything(1, input_X1.want_cargo_on_out,
+                          input_X1.is_acquired,
+                          input_X1.is_done_m1, input_X1.is_done_m2,
+                          input_X1.is_done_m3, input_X1.is_done_m4,
+                          input_X1.is_done_m5, input_X1.is_done_m6,
+                          control1.state);
+    } else if (!is_active && !is_prev_passive_X1){
         is_prev_passive_X1 = true;
-        LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_1 ");
-        LOG("want_cargo_on_out="+String(input_X1.want_cargo_on_out)+" ");
-        LOG("is_acquired="+String(input_X1.is_acquired)+" ");
-        LOG("is_done_m1="+String(input_X1.is_done_m1)+" ");
-        LOG("is_done_m2="+String(input_X1.is_done_m2)+" ");
-        LOG("is_done_m3="+String(input_X1.is_done_m3)+" ");
-        LOG("is_done_m4="+String(input_X1.is_done_m4)+" ");
-        LOG("is_done_m5="+String(input_X1.is_done_m5)+" ");
-        LOG("is_done_m6="+String(input_X1.is_done_m6));
-        LOG("\n");
     }
 
     prev_input_X1.want_cargo_on_out = input_X1.want_cargo_on_out;
@@ -362,6 +369,7 @@ void loop() {
     prev_input_X1.is_done_m4 = input_X1.is_done_m4;
     prev_input_X1.is_done_m5 = input_X1.is_done_m5;
     prev_input_X1.is_done_m6 = input_X1.is_done_m6;
+    #endif
 
     if (control1.state == ControllerX1::GO_UP_PICKUP_Z0) {
         input_X1.want_cargo_on_out = false;
@@ -389,7 +397,9 @@ void loop() {
 
         auto out_X2 = control2.go_step(input_X2);
 
-    bool is_same_input_X2 = (input_X2.want_cargo_on_out == prev_input_X2.want_cargo_on_out &&
+    #ifdef DEBUG_LOG
+    bool is_active = (bool)out_X2.active;
+    bool is_same_input = (input_X2.want_cargo_on_out == prev_input_X2.want_cargo_on_out &&
                              input_X2.is_acquired == prev_input_X2.is_acquired &&
                              input_X2.is_done_m1 == prev_input_X2.is_done_m1 &&
                              input_X2.is_done_m2 == prev_input_X2.is_done_m2 &&
@@ -398,33 +408,18 @@ void loop() {
                              input_X2.is_done_m5 == prev_input_X2.is_done_m5 &&
                              input_X2.is_done_m6 == prev_input_X2.is_done_m6);
 
-    if ((bool)out_X2.active || !is_prev_passive_X2 || !is_same_input_X2){
-        is_prev_passive_X2 = false;
-        LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_2 ");
-        LOG("want_cargo_on_out="+String(input_X2.want_cargo_on_out)+" ");
-        LOG("is_acquired="+String(input_X2.is_acquired)+" ");
-        LOG("is_done_m1="+String(input_X2.is_done_m1)+" ");
-        LOG("is_done_m2="+String(input_X2.is_done_m2)+" ");
-        LOG("is_done_m3="+String(input_X2.is_done_m3)+" ");
-        LOG("is_done_m4="+String(input_X2.is_done_m4)+" ");
-        LOG("is_done_m5="+String(input_X2.is_done_m5)+" ");
-        LOG("is_done_m6="+String(input_X2.is_done_m6));
-        LOG("\n");
-    }
-    if (!(bool)out_X2.active && !is_prev_passive_X2){
+    if (is_active || !is_same_input || !is_prev_passive_X2) {
+        if (is_active){
+            is_prev_passive_X2 = false;
+        }
+        log_everything(2, input_X2.want_cargo_on_out,
+                          input_X2.is_acquired,
+                          input_X2.is_done_m1, input_X2.is_done_m2,
+                          input_X2.is_done_m3, input_X2.is_done_m4,
+                          input_X2.is_done_m5, input_X2.is_done_m6,
+                          control1.state);
+    } else if (!is_active && !is_prev_passive_X2){
         is_prev_passive_X2 = true;
-        LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_2 ");
-        LOG("want_cargo_on_out="+String(input_X2.want_cargo_on_out)+" ");
-        LOG("is_acquired="+String(input_X2.is_acquired)+" ");
-        LOG("is_done_m1="+String(input_X2.is_done_m1)+" ");
-        LOG("is_done_m2="+String(input_X2.is_done_m2)+" ");
-        LOG("is_done_m3="+String(input_X2.is_done_m3)+" ");
-        LOG("is_done_m4="+String(input_X2.is_done_m4)+" ");
-        LOG("is_done_m5="+String(input_X2.is_done_m5)+" ");
-        LOG("is_done_m6="+String(input_X2.is_done_m6));
-        LOG("\n");
     }
 
     prev_input_X2.want_cargo_on_out = input_X2.want_cargo_on_out;
@@ -435,6 +430,7 @@ void loop() {
     prev_input_X2.is_done_m4 = input_X2.is_done_m4;
     prev_input_X2.is_done_m5 = input_X2.is_done_m5;
     prev_input_X2.is_done_m6 = input_X2.is_done_m6;
+    #endif
 
     if (control2.state == ControllerX2::GO_UP_PICKUP_Z0) {
         input_X2.want_cargo_on_out = false;
@@ -462,7 +458,9 @@ void loop() {
 
         auto out_X3 = control3.go_step(input_X3);
 
-    bool is_same_input_X3 = (input_X3.want_cargo_on_out == prev_input_X3.want_cargo_on_out &&
+    #ifdef DEBUG_LOG
+    bool is_active = (bool)out_X3.active;
+    bool is_same_input = (input_X3.want_cargo_on_out == prev_input_X3.want_cargo_on_out &&
                              input_X3.is_acquired == prev_input_X3.is_acquired &&
                              input_X3.is_done_m1 == prev_input_X3.is_done_m1 &&
                              input_X3.is_done_m2 == prev_input_X3.is_done_m2 &&
@@ -471,33 +469,18 @@ void loop() {
                              input_X3.is_done_m5 == prev_input_X3.is_done_m5 &&
                              input_X3.is_done_m6 == prev_input_X3.is_done_m6);
 
-    if ((bool)out_X3.active || !is_prev_passive_X3 || !is_same_input_X3){
-        is_prev_passive_X3 = false;
-        LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_3 ");
-        LOG("want_cargo_on_out="+String(input_X3.want_cargo_on_out)+" ");
-        LOG("is_acquired="+String(input_X3.is_acquired)+" ");
-        LOG("is_done_m1="+String(input_X3.is_done_m1)+" ");
-        LOG("is_done_m2="+String(input_X3.is_done_m2)+" ");
-        LOG("is_done_m3="+String(input_X3.is_done_m3)+" ");
-        LOG("is_done_m4="+String(input_X3.is_done_m4)+" ");
-        LOG("is_done_m5="+String(input_X3.is_done_m5)+" ");
-        LOG("is_done_m6="+String(input_X3.is_done_m6));
-        LOG("\n");
-    }
-    if (!(bool)out_X3.active && !is_prev_passive_X3){
+    if (is_active || !is_same_input || !is_prev_passive_X3) {
+        if (is_active){
+            is_prev_passive_X3 = false;
+        }
+        log_everything(3, input_X3.want_cargo_on_out,
+                          input_X3.is_acquired,
+                          input_X3.is_done_m1, input_X3.is_done_m2,
+                          input_X3.is_done_m3, input_X3.is_done_m4,
+                          input_X3.is_done_m5, input_X3.is_done_m6,
+                          control1.state);
+    } else if (!is_active && !is_prev_passive_X3){
         is_prev_passive_X3 = true;
-        LOG("[iter # "+String(iter)+"] ");
-        LOG("CONTROLLER_3 ");
-        LOG("want_cargo_on_out="+String(input_X3.want_cargo_on_out)+" ");
-        LOG("is_acquired="+String(input_X3.is_acquired)+" ");
-        LOG("is_done_m1="+String(input_X3.is_done_m1)+" ");
-        LOG("is_done_m2="+String(input_X3.is_done_m2)+" ");
-        LOG("is_done_m3="+String(input_X3.is_done_m3)+" ");
-        LOG("is_done_m4="+String(input_X3.is_done_m4)+" ");
-        LOG("is_done_m5="+String(input_X3.is_done_m5)+" ");
-        LOG("is_done_m6="+String(input_X3.is_done_m6));
-        LOG("\n");
     }
 
     prev_input_X3.want_cargo_on_out = input_X3.want_cargo_on_out;
@@ -508,6 +491,7 @@ void loop() {
     prev_input_X3.is_done_m4 = input_X3.is_done_m4;
     prev_input_X3.is_done_m5 = input_X3.is_done_m5;
     prev_input_X3.is_done_m6 = input_X3.is_done_m6;
+    #endif
 
     if (control3.state == ControllerX3::GO_UP_PICKUP_Z0) {
         input_X3.want_cargo_on_out = false;
