@@ -4,8 +4,8 @@
 struct ControllerX3 {
     enum struct AngleBase{
         A0 = 0,
-        A90 = 90,
-        A120 = 120
+        A60 = 60,
+        A90 = 90
     };
     enum struct AngleShoulder{
         A65 = 65,
@@ -40,12 +40,13 @@ struct ControllerX3 {
         GO_UP_Z0,
         GO_LOW_Z0,
         GO_PICKUP_Z0,
-        GO_UP_PICKUP_Z0,
+        GO_UP_CLENCHED_Z0,
         WAIT_ACK,
-        GO_UP_PICKUP_Z1,
-        GO_LOW_PICKUP_Z1,
+        GO_UP_CLENCHED_Z1,
+        GO_LOW_CLENCHED_Z1,
         GO_DROP_Z1,
         GO_UP_Z1,
+        WAIT_RELEASE,
         __SAME__
     } state = BEGIN;
 
@@ -92,24 +93,28 @@ struct ControllerX3 {
             next_state = GO_PICKUP_Z0;
 
         } else if (state == GO_PICKUP_Z0 && is_done_all) {
-            next_state = GO_UP_PICKUP_Z0;
+            next_state = GO_UP_CLENCHED_Z0;
 
-        } else if (state == GO_UP_PICKUP_Z0 && is_done_all) {
+        } else if (state == GO_UP_CLENCHED_Z0 && is_done_all) {
             next_state = WAIT_ACK;
 
         } else if (state == WAIT_ACK && input.is_acquired) {
-            next_state = GO_UP_PICKUP_Z1;
+            next_state = GO_UP_CLENCHED_Z1;
 
-        } else if (state == GO_UP_PICKUP_Z1 && is_done_all) {
-            next_state = GO_LOW_PICKUP_Z1;
+        } else if (state == GO_UP_CLENCHED_Z1 && is_done_all) {
+            next_state = GO_LOW_CLENCHED_Z1;
 
-        } else if (state == GO_LOW_PICKUP_Z1 && is_done_all) {
+        } else if (state == GO_LOW_CLENCHED_Z1 && is_done_all) {
             next_state = GO_DROP_Z1;
 
         } else if (state == GO_DROP_Z1 && is_done_all) {
             next_state = GO_UP_Z1;
 
-        } else if ((state == GO_UP_Z1 || state == GO_UP_Z0 || state == GO_LOW_Z0) && is_done_all) {
+        } else if (state == GO_UP_Z1 && is_done_all){
+            next_state = WAIT_RELEASE;
+
+        } else if (((state == WAIT_RELEASE && !is_acquired) ||
+                     state == GO_UP_Z0 || state == GO_LOW_Z0) && is_done_all) {
             next_state = GO_WAIT;
         }
 
@@ -123,7 +128,7 @@ struct ControllerX3 {
             out.go_wrist_ver = AngleWristVer::A10;
             out.go_wrist_rot = AngleWristRot::A0;
             out.go_gripper = AngleGripper::A15;
-            out.want_to_release = false;
+            //out.want_to_release = false;
         } else if (next_state == WAIT) {
             out.want_to_release = false;
         } else if (next_state == GO_UP_Z0) {
@@ -147,45 +152,45 @@ struct ControllerX3 {
             out.go_wrist_ver = AngleWristVer::A10;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_UP_PICKUP_Z0) {
+        } else if (next_state == GO_UP_CLENCHED_Z0) {
             out.go_base = AngleBase::A90;
             out.go_shoulder = AngleShoulder::A115;
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-            out.want_to_acquire = true;
         } else if (next_state == WAIT_ACK) {
-            //do nothing
-        } else if (next_state == GO_UP_PICKUP_Z1) {
-            out.go_base = AngleBase::A120;
+            out.want_to_acquire = true;
+        } else if (next_state == GO_UP_CLENCHED_Z1) {
+            out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
             out.want_to_acquire = false;
-        } else if (next_state == GO_LOW_PICKUP_Z1) {
-            out.go_base = AngleBase::A120;
+        } else if (next_state == GO_LOW_CLENCHED_Z1) {
+            out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A80;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A170;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
         } else if (next_state == GO_DROP_Z1) {
-            out.go_base = AngleBase::A120;
+            out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A80;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A170;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A15;
         } else if (next_state == GO_UP_Z1) {
-            out.go_base = AngleBase::A120;
+            out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A15;
+        } else if (next_state == WAIT_RELEASE) {
             out.want_to_release = true;
         } else {
             // do nothing
