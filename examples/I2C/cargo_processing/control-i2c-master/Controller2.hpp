@@ -91,6 +91,57 @@ struct ControllerX2 {
         AngleGripper go_gripper;
     } out;
 
+    String state2string(State s) {
+        switch (s) {
+            case BEGIN:
+                return "BEGIN";
+            case GO_WAIT:
+                return "GO_WAIT";
+            case WAIT:
+                return "WAIT";
+            case GO_SAFE_Z1:
+                return "GO_SAFE_Z1";
+            case GO_UP_Z1:
+                return "GO_UP_Z1";
+            case GO_LOW_Z1:
+                return "GO_LOW_Z1";
+            case GO_PICKUP_Z1:
+                return "GO_PICKUP_Z1";
+            case GO_UP_PICKUP_Z1:
+                return "GO_UP_PICKUP_Z1";
+            case GO_SAFE_PICKUP_Z1:
+                return "GO_SAFE_PICKUP_Z1";
+            case GO_SAFE_Z2:
+                return "GO_SAFE_Z2";
+            case GO_UP_Z2:
+                return "GO_UP_Z2";
+            case GO_LOW_Z2:
+                return "GO_LOW_Z2";
+            case GO_PICKUP_Z2:
+                return "GO_PICKUP_Z2";
+            case GO_UP_PICKUP_Z2:
+                return "GO_UP_PICKUP_Z2";
+            case GO_SAFE_PICKUP_Z2:
+                return "GO_SAFE_PICKUP_Z2";
+            case GO_SAFE_Z31:
+                return "GO_SAFE_Z31";
+            case GO_SAFE_Z32:
+                return "GO_SAFE_Z32";
+            case GO_UP_PICKUP_Z3:
+                return "GO_UP_PICKUP_Z3";
+            case GO_LOW_PICKUP_Z3:
+                return "GO_LOW_PICKUP_Z3";
+            case GO_DROP_Z3:
+                return "GO_DROP_Z3";
+            case GO_UP_Z3:
+                return "GO_UP_Z3";
+            case __SAME__:
+                return "__SAME__";
+            default:
+                return "";
+        }
+    }
+
     bool go_step(Input input) {
         bool is_done_all = input.is_done_m1 &&
                            input.is_done_m2 &&
