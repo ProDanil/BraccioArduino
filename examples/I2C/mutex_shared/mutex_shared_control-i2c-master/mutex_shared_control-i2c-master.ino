@@ -264,7 +264,7 @@ void log_everything(int control,
                     bool is_done_m1, bool is_done_m2,
                     bool is_done_m3, bool is_done_m4,
                     bool is_done_m5, bool is_done_m6,
-                    int st,
+                    String st,
                     bool want_to_acquire, bool want_to_release,
                     int base, int shoulder,
                     int elbow, int wrist_ver,
@@ -272,6 +272,7 @@ void log_everything(int control,
 
     Serial.print("[iter # "+String(iter)+"] ");
     Serial.print("CONTROLLER_"+String(control)+" ");
+    Serial.print(" state="+st);
     Serial.print("INPUTS ");
     Serial.print("want_cargo_on_out="+String(want_cargo_on_out)+" ");
     Serial.print("is_acquired="+String(is_acquired)+" ");
@@ -281,7 +282,6 @@ void log_everything(int control,
     Serial.print("is_done_m4="+String(is_done_m4)+" ");
     Serial.print("is_done_m5="+String(is_done_m5)+" ");
     Serial.print("is_done_m6="+String(is_done_m6));
-    Serial.print(" state="+String(st));
     Serial.print(" OUTPUTS ");
     Serial.print("want_to_acquire="+String(want_to_acquire)+" ");
     Serial.print("want_to_release="+String(want_to_release)+" ");
@@ -364,13 +364,12 @@ void loop() {
         if (is_active){
             is_prev_passive_X1 = false;
         }
-        int st = control1.state;
         log_everything(1, input_X1.want_cargo_on_out,
                           input_X1.is_acquired,
                           input_X1.is_done_m1, input_X1.is_done_m2,
                           input_X1.is_done_m3, input_X1.is_done_m4,
                           input_X1.is_done_m5, input_X1.is_done_m6,
-                          st,
+                          out_X1.st,
                           out_X1.want_to_acquire, out_X1.want_to_release,
                           (int)out_X1.go_base, (int)out_X1.go_shoulder,
                           (int)out_X1.go_elbow, (int)out_X1.go_wrist_ver,
@@ -431,13 +430,12 @@ void loop() {
         if (is_active){
             is_prev_passive_X2 = false;
         }
-        int st = control2.state;
         log_everything(2, input_X2.want_cargo_on_out,
                           input_X2.is_acquired,
                           input_X2.is_done_m1, input_X2.is_done_m2,
                           input_X2.is_done_m3, input_X2.is_done_m4,
                           input_X2.is_done_m5, input_X2.is_done_m6,
-                          st,
+                          out_X2.st,
                           out_X2.want_to_acquire, out_X2.want_to_release,
                           (int)out_X2.go_base, (int)out_X2.go_shoulder,
                           (int)out_X2.go_elbow, (int)out_X2.go_wrist_ver,
@@ -498,13 +496,12 @@ void loop() {
         if (is_active){
             is_prev_passive_X3 = false;
         }
-        int st = control3.state;
         log_everything(3, input_X3.want_cargo_on_out,
                           input_X3.is_acquired,
                           input_X3.is_done_m1, input_X3.is_done_m2,
                           input_X3.is_done_m3, input_X3.is_done_m4,
                           input_X3.is_done_m5, input_X3.is_done_m6,
-                          st,
+                          out_X3.st,
                           out_X3.want_to_acquire, out_X3.want_to_release,
                           (int)out_X3.go_base, (int)out_X3.go_shoulder,
                           (int)out_X3.go_elbow, (int)out_X3.go_wrist_ver,
