@@ -192,7 +192,6 @@ void loop() {
         MESSAGE("*** REQUEST: move the cargo to pos Z1 ***");
         request_Z1 = true;
     }
-    update_leds();
 
     // Z1 and Z2 processed
     if (analogRead(PIN_Z12_TO_OUT) >= 100 && analogRead(PIN_Z12_TO_OUT) < 700 && occupied_Z2) {
@@ -205,6 +204,7 @@ void loop() {
         processed_Z1 = false;
         processed_Z2 = false;
     } */
+
     update_leds();
 
     // ==========================================
@@ -283,7 +283,6 @@ void loop() {
             MESSAGE("*** The cargo on Z2 pos ***");
             occupied_Z2 = true;
         }
-        update_leds();
 
         // Checking for new target
         bool new_target = target_angle_X1[0] == (int)out.go_base &&
@@ -387,7 +386,6 @@ void loop() {
             processed_Z2 = false;
             occupied_Z2 = false;
         }
-        update_leds();
 
         // Checking for new target
         bool is_new_target = target_angle_X1[0] == (int)out.go_base &&
@@ -418,6 +416,10 @@ void loop() {
         // Update last_out
         last_out_X2 = out;
     }
+
+    // ==========================================
+
+    update_leds();
 
     delay(100);
 }
