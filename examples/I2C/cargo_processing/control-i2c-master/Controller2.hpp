@@ -59,14 +59,27 @@ struct ControllerX2 {
         __SAME__
     } state = BEGIN;
 
-    State next_state = __SAME__;
-
     struct Input {
-        bool cargo_is_processed_Z1; bool cargo_is_processed_Z2;
-        bool is_done_m1; bool is_done_m2;
-        bool is_done_m3; bool is_done_m4;
-        bool is_done_m5; bool is_done_m6;
-    } input;
+        bool cargo_is_processed_Z1;
+        bool cargo_is_processed_Z2;
+        bool is_done_m1;
+        bool is_done_m2;
+        bool is_done_m3;
+        bool is_done_m4;
+        bool is_done_m5;
+        bool is_done_m6;
+
+        bool operator==(const Input& other) const {
+            return cargo_is_processed_Z1 == other.cargo_is_processed_Z1 &&
+                   cargo_is_processed_Z2 == other.cargo_is_processed_Z2 &&
+                   is_done_m1 == other.is_done_m1 &&
+                   is_done_m2 == other.is_done_m2 &&
+                   is_done_m3 == other.is_done_m3 &&
+                   is_done_m4 == other.is_done_m4 &&
+                   is_done_m5 == other.is_done_m5 &&
+                   is_done_m6 == other.is_done_m6;
+        }
+    };
 
     struct Out {
         /* TODO: initial values */
@@ -76,12 +89,19 @@ struct ControllerX2 {
         AngleWristVer go_wrist_ver;
         AngleWristRot go_wrist_rot;
         AngleGripper go_gripper;
-        bool active;
     } out;
 
-    Out go_step(Input input) {
-        bool is_done_all = input.is_done_m1 && input.is_done_m2 && input.is_done_m3 && input.is_done_m4 && input.is_done_m5 && input.is_done_m6;
+    bool go_step(Input input) {
+        bool is_done_all = input.is_done_m1 &&
+                           input.is_done_m2 &&
+                           input.is_done_m3 &&
+                           input.is_done_m4 &&
+                           input.is_done_m5 &&
+                           input.is_done_m6;
 
+        State next_state = __SAME__;
+
+        // Compute next state
         if (0) {
         } else if (state == BEGIN) {
             next_state = GO_WAIT;
@@ -147,8 +167,7 @@ struct ControllerX2 {
             next_state = GO_WAIT;
         }
 
-        // ==========================================
-
+        // Compute outputs
         if (0) {
         } else if (next_state == GO_WAIT) {
             out.go_base = AngleBase::A0;
@@ -289,13 +308,13 @@ struct ControllerX2 {
             // do nothing
         }
 
-        if (state == next_state){
-            out.active = false;
-        } else {
-            out.active = true;
+        // Update the state
+        if (next_state != __SAME__) {
+            state = next_state;
         }
-        state = next_state;
-        return out;
+
+        // return is_active
+        return (next_state != __SAME__);
     }
 };
 

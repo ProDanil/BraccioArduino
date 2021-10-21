@@ -1,7 +1,6 @@
 #ifndef Controller1_hpp
 #define Controller1_hpp
 
-
 struct ControllerX1 {
     enum struct AngleBase {
         A0 = 0,
@@ -66,14 +65,30 @@ struct ControllerX1 {
         __SAME__
     } state = BEGIN;
 
-    State next_state = __SAME__;
-
     struct Input {
-        bool want_cargo_on_Z1; bool want_cargo_on_Z2;
-        bool cargo_on_Z1; bool cargo_on_Z2;
-        bool is_done_m1; bool is_done_m2;
-        bool is_done_m3; bool is_done_m4;
-        bool is_done_m5; bool is_done_m6;
+        bool want_cargo_on_Z1;
+        bool want_cargo_on_Z2;
+        bool cargo_on_Z1;
+        bool cargo_on_Z2;
+        bool is_done_m1;
+        bool is_done_m2;
+        bool is_done_m3;
+        bool is_done_m4;
+        bool is_done_m5;
+        bool is_done_m6;
+
+        bool operator==(const Input& other) const {
+            return want_cargo_on_Z1 == other.want_cargo_on_Z1 &&
+                   want_cargo_on_Z2 == other.want_cargo_on_Z2 &&
+                   cargo_on_Z1 == other.cargo_on_Z1 &&
+                   cargo_on_Z2 == other.cargo_on_Z2 &&
+                   is_done_m1 == other.is_done_m1 &&
+                   is_done_m2 == other.is_done_m2 &&
+                   is_done_m3 == other.is_done_m3 &&
+                   is_done_m4 == other.is_done_m4 &&
+                   is_done_m5 == other.is_done_m5 &&
+                   is_done_m6 == other.is_done_m6;
+        }
     };
 
     struct Out {
@@ -84,13 +99,78 @@ struct ControllerX1 {
         AngleWristVer go_wrist_ver;
         AngleWristRot go_wrist_rot;
         AngleGripper go_gripper;
-        bool active;
     } out;
 
-    Out go_step(Input input) {
+    String state2string(State s) {
+        switch (s) {
+            case BEGIN:
+                return "BEGIN";
+            case GO_WAIT:
+                return "GO_WAIT";
+            case WAIT:
+                return "WAIT";
+            case GO_SAFE_Z01:
+                return "GO_SAFE_Z01";
+            case GO_UP_Z01:
+                return "GO_UP_Z01";
+            case GO_LOW_Z01:
+                return "GO_LOW_Z01";
+            case GO_PICKUP_Z01:
+                return "GO_PICKUP_Z01";
+            case GO_UP_PICKUP_Z01:
+                return "GO_UP_PICKUP_Z01";
+            case GO_SAFE_PICKUP_Z01:
+                return "GO_SAFE_PICKUP_Z01";
+            case GO_SAFE_Z02:
+                return "GO_SAFE_Z02";
+            case GO_UP_Z02:
+                return "GO_UP_Z02";
+            case GO_LOW_Z02:
+                return "GO_LOW_Z02";
+            case GO_PICKUP_Z02:
+                return "GO_PICKUP_Z02";
+            case GO_UP_PICKUP_Z02:
+                return "GO_UP_PICKUP_Z02";
+            case GO_SAFE_PICKUP_Z02:
+                return "GO_SAFE_PICKUP_Z02";
+            case GO_SAFE_Z1:
+                return "GO_SAFE_Z1";
+            case GO_UP_PICKUP_Z1:
+                return "GO_UP_PICKUP_Z1";
+            case GO_LOW_PICKUP_Z1:
+                return "GO_LOW_PICKUP_Z1";
+            case GO_DROP_Z1:
+                return "GO_DROP_Z1";
+            case GO_UP_Z1:
+                return "GO_UP_Z1";
+            case GO_SAFE_Z2:
+                return "GO_SAFE_Z2";
+            case GO_UP_PICKUP_Z2:
+                return "GO_UP_PICKUP_Z2";
+            case GO_LOW_PICKUP_Z2:
+                return "GO_LOW_PICKUP_Z2";
+            case GO_DROP_Z2:
+                return "GO_DROP_Z2";
+            case GO_UP_Z2:
+                return "GO_UP_Z2";
+            case __SAME__:
+                return "__SAME__";
+            default:
+                return "";
+        }
+    }
 
-        bool is_done_all = input.is_done_m1 && input.is_done_m2 && input.is_done_m3 && input.is_done_m4 && input.is_done_m5 && input.is_done_m6;
+    bool go_step(Input input) {
+        bool is_done_all = input.is_done_m1 &&
+                           input.is_done_m2 &&
+                           input.is_done_m3 &&
+                           input.is_done_m4 &&
+                           input.is_done_m5 &&
+                           input.is_done_m6;
 
+        State next_state = __SAME__;
+
+        // Compute next state
         if (0) {
         } else if (state == BEGIN) {
             next_state = GO_WAIT;
@@ -169,11 +249,9 @@ struct ControllerX1 {
 
         } else if ((state == GO_UP_Z2 || state == GO_SAFE_Z02 || state == GO_UP_Z02 || state == GO_LOW_Z02) && is_done_all) {
             next_state = GO_WAIT;
-
         }
 
-        // ==========================================
-
+        // Compute outputs
         if (0) {
         } else if (next_state == GO_WAIT) {
             out.go_base = AngleBase::A0;
@@ -342,13 +420,13 @@ struct ControllerX1 {
             // do nothing
         }
 
-        if (state == next_state){
-            out.active = false;
-        } else {
-            out.active = true;
+        // Update the state
+        if (next_state != __SAME__) {
+            state = next_state;
         }
-        state = next_state;
-        return out;
+
+        // return is_active
+        return (next_state != __SAME__);
     }
 };
 
