@@ -59,7 +59,18 @@ struct ControllerX1 {
         bool is_done_m4;
         bool is_done_m5;
         bool is_done_m6;
-    } input;
+
+        bool operator==(const Input& other) const {
+            return want_cargo_on_out == other.want_cargo_on_out &&
+                   is_acquired == other.is_acquired &&
+                   is_done_m1 == other.is_done_m1 &&
+                   is_done_m2 == other.is_done_m2 &&
+                   is_done_m3 == other.is_done_m3 &&
+                   is_done_m4 == other.is_done_m4 &&
+                   is_done_m5 == other.is_done_m5 &&
+                   is_done_m6 == other.is_done_m6;
+        }
+    };
 
     struct Out {
         /* TODO: initial values */
@@ -119,7 +130,7 @@ struct ControllerX1 {
 
         State next_state = __SAME__;
 
-        // Compute next state
+        // Compute the next state
         if (0) {
         } else if (state == BEGIN) {
             next_state = GO_WAIT;
