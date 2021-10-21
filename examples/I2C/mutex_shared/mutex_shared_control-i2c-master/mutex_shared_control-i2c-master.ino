@@ -31,6 +31,8 @@
 #define I2C_ADDR_SLAVE_X2 12
 #define I2C_ADDR_SLAVE_X3 13
 
+#define TIMER 1000  // ms logs timing
+
 ControllerX1 control1;
 ControllerX2 control2;
 ControllerX3 control3;
@@ -59,6 +61,9 @@ bool is_prev_passive_X2;
 bool is_prev_passive_X3;
 
 unsigned iter = 0;
+
+unsigned long timing;
+bool printed_done[3] = {false, false, false};
 
 struct Mutex {
     // `acquired == 0` means "not acquired"
@@ -202,6 +207,56 @@ void send_target_angles(int slave_address, uint8_t (&target_angle)[6]) {
     Wire.endTransmission();
 }
 
+void print_input_control(
+    int controller,
+    uint8_t current_angle[6],
+    bool want_cargo_on_out,
+    bool is_acquired,
+    bool is_done_m1,
+    bool is_done_m2,
+    bool is_done_m3,
+    bool is_done_m4,
+    bool is_done_m5,
+    bool is_done_m6) {
+    bool all_is_done = is_done_m1 && is_done_m2 && is_done_m3 && is_done_m4 && is_done_m5 && is_done_m6;
+    if (!all_is_done) {
+        printed_done[controller - 1] = false;
+        if (millis() - timing > TIMER) {
+            timing = millis();
+            Serial.print("     INPUTS CONTROLLER");
+            Serial.println(controller);
+
+            Serial.println("Want cargo on out: " + String(want_cargo_on_out));
+            Serial.println("is acquired: " + String(is_acquired));
+
+            Serial.print("Current angles: (");
+            Serial.print(String(current_angle[0]) + ", " + String(current_angle[1]) + ", " +
+                         String(current_angle[2]) + ", " + String(current_angle[3]) + ", " +
+                         String(current_angle[4]) + ", " + String(current_angle[5]));
+            Serial.println(")");
+
+            Serial.println("[M1.done] " + String(is_done_m1) + " [M2.done] " + String(is_done_m2) +
+                           " [M3.done] " + String(is_done_m3) + " [M4.done] " + String(is_done_m4) +
+                           " [M5.done] " + String(is_done_m5) + " [M6.done] " + String(is_done_m6));
+        }
+
+    } else if ((controller == 1 && !printed_done[0]) || (controller == 2 && !printed_done[1]) || (controller == 3 && !printed_done[2])) {
+        Serial.println("[M1.done] " + String(is_done_m1) + " [M2.done] " + String(is_done_m2) +
+                       " [M3.done] " + String(is_done_m3) + " [M4.done] " + String(is_done_m4) +
+                       " [M5.done] " + String(is_done_m5) + " [M6.done] " + String(is_done_m6));
+        printed_done[controller - 1] = true;
+    }
+}
+
+void print_out_control(int controller, uint8_t target_angle[6]) {
+    Serial.print("     OUTPUTS CONTROLLER");
+    Serial.println(controller);
+    Serial.print("Target angles: (");
+    Serial.print(String(target_angle[0]) + ", " + String(target_angle[1]) + ", " + String(target_angle[2]) + ", " +
+                 String(target_angle[3]) + ", " + String(target_angle[4]) + ", " + String(target_angle[5]));
+    Serial.println(")");
+}
+
 void log_everything(int index,
                     bool want_cargo_on_out,
                     bool is_acquired,
@@ -287,6 +342,16 @@ void loop() {
         input.is_done_m5 = (current_angle_X1[4] == target_angle_X1[4]);
         input.is_done_m6 = (current_angle_X1[5] == target_angle_X1[5]);
 
+#ifdef DEBUG_MESSAGE
+        // Print inputs controller 1
+        print_input_control(
+            1, current_angle_X1,
+            input.want_cargo_on_out, input.is_acquired,
+            input.is_done_m1, input.is_done_m2,
+            input.is_done_m3, input.is_done_m4,
+            input.is_done_m5, input.is_done_m6);
+#endif
+
         // Execute the controller
         bool is_active = control1.go_step(input);
         auto out = control1.out;
@@ -327,6 +392,16 @@ void loop() {
             occupied_Z1 = false;
         }
 
+#ifdef DEBUG_MESSAGE
+        // Checking for new target
+        bool is_new_target = target_angle_X1[0] == (int)out.go_base &&
+                             target_angle_X1[1] == (int)out.go_shoulder &&
+                             target_angle_X1[2] == (int)out.go_elbow &&
+                             target_angle_X1[3] == (int)out.go_wrist_ver &&
+                             target_angle_X1[4] == (int)out.go_wrist_rot &&
+                             target_angle_X1[5] == (int)out.go_gripper;
+#endif
+
         // Send controls to the plant
         target_angle_X1[0] = (int)out.go_base;
         target_angle_X1[1] = (int)out.go_shoulder;
@@ -335,6 +410,13 @@ void loop() {
         target_angle_X1[4] = (int)out.go_wrist_rot;
         target_angle_X1[5] = (int)out.go_gripper;
         send_target_angles(I2C_ADDR_SLAVE_X1, target_angle_X1);
+
+#ifdef DEBUG_MESSAGE
+        // Print out controller 1
+        if (is_new_target) {
+            print_out_control(1, target_angle_X1);
+        }
+#endif
 
         // Update last_input
         last_input_X1 = input;
@@ -357,6 +439,16 @@ void loop() {
         input.is_done_m4 = (current_angle_X2[3] == target_angle_X2[3]);
         input.is_done_m5 = (current_angle_X2[4] == target_angle_X2[4]);
         input.is_done_m6 = (current_angle_X2[5] == target_angle_X2[5]);
+
+#ifdef DEBUG_MESSAGE
+        // Print inputs controller 2
+        print_input_control(
+            2, current_angle_X2,
+            input.want_cargo_on_out, input.is_acquired,
+            input.is_done_m1, input.is_done_m2,
+            input.is_done_m3, input.is_done_m4,
+            input.is_done_m5, input.is_done_m6);
+#endif
 
         // Execute the controller
         bool is_active = control2.go_step(input);
@@ -396,6 +488,16 @@ void loop() {
             occupied_Z2 = false;
         }
 
+#ifdef DEBUG_MESSAGE
+        // Checking for new target
+        bool is_new_target = target_angle_X2[0] == (int)out.go_base &&
+                             target_angle_X2[1] == (int)out.go_shoulder &&
+                             target_angle_X2[2] == (int)out.go_elbow &&
+                             target_angle_X2[3] == (int)out.go_wrist_ver &&
+                             target_angle_X2[4] == (int)out.go_wrist_rot &&
+                             target_angle_X2[5] == (int)out.go_gripper;
+#endif
+
         // Send controls to the plant
         target_angle_X2[0] = (int)out.go_base;
         target_angle_X2[1] = (int)out.go_shoulder;
@@ -404,6 +506,13 @@ void loop() {
         target_angle_X2[4] = (int)out.go_wrist_rot;
         target_angle_X2[5] = (int)out.go_gripper;
         send_target_angles(I2C_ADDR_SLAVE_X2, target_angle_X2);
+
+#ifdef DEBUG_MESSAGE
+        // Print out controller 2
+        if (is_new_target) {
+            print_out_control(2, target_angle_X2);
+        }
+#endif
 
         // Update last_input
         last_input_X2 = input;
@@ -426,6 +535,16 @@ void loop() {
         input.is_done_m4 = (current_angle_X3[3] == target_angle_X3[3]);
         input.is_done_m5 = (current_angle_X3[4] == target_angle_X3[4]);
         input.is_done_m6 = (current_angle_X3[5] == target_angle_X3[5]);
+
+#ifdef DEBUG_MESSAGE
+        // Print inputs controller 3
+        print_input_control(
+            3, current_angle_X3,
+            input.want_cargo_on_out, input.is_acquired,
+            input.is_done_m1, input.is_done_m2,
+            input.is_done_m3, input.is_done_m4,
+            input.is_done_m5, input.is_done_m6);
+#endif
 
         // Execute the controller
         bool is_active = control3.go_step(input);
@@ -465,6 +584,16 @@ void loop() {
             occupied_Z3 = false;
         }
 
+#ifdef DEBUG_MESSAGE
+        // Checking for new target
+        bool is_new_target = target_angle_X3[0] == (int)out.go_base &&
+                             target_angle_X3[1] == (int)out.go_shoulder &&
+                             target_angle_X3[2] == (int)out.go_elbow &&
+                             target_angle_X3[3] == (int)out.go_wrist_ver &&
+                             target_angle_X3[4] == (int)out.go_wrist_rot &&
+                             target_angle_X3[5] == (int)out.go_gripper;
+#endif
+
         // Send controls to the plant
         target_angle_X3[0] = (int)out.go_base;
         target_angle_X3[1] = (int)out.go_shoulder;
@@ -473,6 +602,13 @@ void loop() {
         target_angle_X3[4] = (int)out.go_wrist_rot;
         target_angle_X3[5] = (int)out.go_gripper;
         send_target_angles(I2C_ADDR_SLAVE_X3, target_angle_X3);
+
+#ifdef DEBUG_MESSAGE
+        // Print out controller 3
+        if (is_new_target) {
+            print_out_control(3, target_angle_X3);
+        }
+#endif
 
         // Update last_input
         last_input_X3 = input;
