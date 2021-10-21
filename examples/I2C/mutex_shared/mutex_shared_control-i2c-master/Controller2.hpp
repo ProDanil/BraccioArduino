@@ -71,7 +71,44 @@ struct ControllerX2 {
         bool active;
         bool want_to_release;
         bool want_to_acquire;
+        String st;
     } out;
+
+    String state2string(State st){
+        switch (st){
+            case 0:
+                return "BEGIN";
+            case 1:
+                return "GO_WAIT";
+            case 2:
+                return "WAIT";
+            case 3:
+                return "GO_UP_Z0";
+            case 4:
+                return "GO_LOW_Z0";
+            case 5:
+                return "GO_PICKUP_Z0";
+            case 6:
+                return "GO_UP_CLENCHED_Z0";
+            case 7:
+                return "WAIT_ACK";
+            case 8:
+                return "GO_UP_CLENCHED_Z1";
+            case 9:
+                return "GO_LOW_CLENCHED_Z1";
+            case 10:
+                return "GO_DROP_Z1";
+            case 11:
+                return "GO_UP_Z1";
+            case 12:
+                return "WAIT_RELEASE";
+            case 13:
+                return "__SAME__";
+            default:
+                return "";
+        }
+    };
+
 
     Out go_step(Input input) {
         bool is_done_all = input.is_done_m1 && input.is_done_m2 && input.is_done_m3 && input.is_done_m4 && input.is_done_m5 && input.is_done_m6;
@@ -200,6 +237,7 @@ struct ControllerX2 {
             state = next_state;
         }
         out.active = (next_state != __SAME__);
+        out.st = state2string(state);
         return out;
     }
 };
