@@ -2,33 +2,33 @@
 #define Controller3_hpp
 
 struct ControllerX3 {
-    enum struct AngleBase{
+    enum struct AngleBase {
         A0 = 0,
         A60 = 60,
         A90 = 90
     };
-    enum struct AngleShoulder{
+    enum struct AngleShoulder {
         A65 = 65,
         A80 = 80,
         A100 = 100,
         A115 = 115,
         A140 = 140
     };
-    enum struct AngleElbow{
+    enum struct AngleElbow {
         A0 = 0,
         A180 = 180
     };
-    enum struct AngleWristVer{
+    enum struct AngleWristVer {
         A10 = 10,
         A15 = 15,
         A165 = 165,
         A170 = 170
     };
-    enum struct AngleWristRot{
+    enum struct AngleWristRot {
         A0 = 0,
         A90 = 90
     };
-    enum struct AngleGripper{
+    enum struct AngleGripper {
         A15 = 15,
         A73 = 73
     };
@@ -50,14 +50,15 @@ struct ControllerX3 {
         __SAME__
     } state = BEGIN;
 
-    State next_state = __SAME__;
-
     struct Input {
         bool want_cargo_on_out;
         bool is_acquired;
-        bool is_done_m1; bool is_done_m2;
-        bool is_done_m3; bool is_done_m4;
-        bool is_done_m5; bool is_done_m6;
+        bool is_done_m1;
+        bool is_done_m2;
+        bool is_done_m3;
+        bool is_done_m4;
+        bool is_done_m5;
+        bool is_done_m6;
     } input;
 
     struct Out {
@@ -68,14 +69,13 @@ struct ControllerX3 {
         AngleWristVer go_wrist_ver;
         AngleWristRot go_wrist_rot;
         AngleGripper go_gripper;
-        bool active;
         bool want_to_release;
         bool want_to_acquire;
         String st;
     } out;
 
-    String state2string(State st){
-        switch (st){
+    String state2string(State s) {
+        switch (s) {
             case BEGIN:
                 return "BEGIN";
             case GO_WAIT:
@@ -109,10 +109,12 @@ struct ControllerX3 {
         }
     };
 
-
-    Out go_step(Input input) {
+    bool go_step(Input input) {
         bool is_done_all = input.is_done_m1 && input.is_done_m2 && input.is_done_m3 && input.is_done_m4 && input.is_done_m5 && input.is_done_m6;
 
+        State next_state = __SAME__;
+
+        // Compute the next state
         if (0) {
         } else if (state == BEGIN) {
             next_state = GO_WAIT;
@@ -147,16 +149,16 @@ struct ControllerX3 {
         } else if (state == GO_DROP_Z1 && is_done_all) {
             next_state = GO_UP_Z1;
 
-        } else if (state == GO_UP_Z1 && is_done_all){
+        } else if (state == GO_UP_Z1 && is_done_all) {
             next_state = WAIT_RELEASE;
 
         } else if (((state == WAIT_RELEASE && !input.is_acquired) ||
-                     state == GO_UP_Z0 || state == GO_LOW_Z0) && is_done_all) {
+                    state == GO_UP_Z0 || state == GO_LOW_Z0) &&
+                   is_done_all) {
             next_state = GO_WAIT;
         }
 
-        // ==========================================
-
+        // Compute outputs
         if (0) {
         } else if (next_state == GO_WAIT) {
             out.go_base = AngleBase::A90;
@@ -233,12 +235,13 @@ struct ControllerX3 {
             // do nothing
         }
 
-        if (next_state != __SAME__){
+        // Update the state
+        if (next_state != __SAME__) {
             state = next_state;
         }
-        out.active = (next_state != __SAME__);
-        out.st = state2string(state);
-        return out;
+
+        // return is_active
+        return (next_state != __SAME__);
     }
 };
 
