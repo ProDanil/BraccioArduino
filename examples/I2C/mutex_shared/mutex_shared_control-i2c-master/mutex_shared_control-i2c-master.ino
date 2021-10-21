@@ -68,7 +68,6 @@ bool is_prev_passive_X3;
 unsigned long timing;
 unsigned iter = 0;
 
-
 void setup() {
     Wire.begin();  // begin as master
     Serial.begin(9600);
@@ -261,14 +260,19 @@ void send_target_angles(int slave_address, uint8_t (&target_angle)[6]) {
 }
 
 void log_everything(int control,
-                    bool want_cargo_on_out,
-                    bool is_acquired,
+                    bool want_cargo_on_out, bool is_acquired,
                     bool is_done_m1, bool is_done_m2,
                     bool is_done_m3, bool is_done_m4,
                     bool is_done_m5, bool is_done_m6,
-                    String state){
+                    int st,
+                    bool want_to_acquire, bool want_to_release,
+                    int base, int shoulder,
+                    int elbow, int wrist_ver,
+                    int wrist_rot, int gripper){
+
     Serial.print("[iter # "+String(iter)+"] ");
     Serial.print("CONTROLLER_"+String(control)+" ");
+    Serial.print("INPUTS ");
     Serial.print("want_cargo_on_out="+String(want_cargo_on_out)+" ");
     Serial.print("is_acquired="+String(is_acquired)+" ");
     Serial.print("is_done_m1="+String(is_done_m1)+" ");
@@ -277,7 +281,16 @@ void log_everything(int control,
     Serial.print("is_done_m4="+String(is_done_m4)+" ");
     Serial.print("is_done_m5="+String(is_done_m5)+" ");
     Serial.print("is_done_m6="+String(is_done_m6));
-    Serial.println(" state="+state);
+    Serial.print(" state="+String(st));
+    Serial.print(" OUTPUTS ");
+    Serial.print("want_to_acquire="+String(want_to_acquire)+" ");
+    Serial.print("want_to_release="+String(want_to_release)+" ");
+    Serial.print("base="+String(base)+" ");
+    Serial.print("shoulder="+String(shoulder)+" ");
+    Serial.print("elbow="+String(elbow)+" ");
+    Serial.print("wrist_ver="+String(wrist_ver)+" ");
+    Serial.print("wrist_rot="+String(wrist_rot)+" ");
+    Serial.println("gripper="+String(gripper)+" ");
 }
 
 
@@ -351,12 +364,18 @@ void loop() {
         if (is_active){
             is_prev_passive_X1 = false;
         }
+        int st = control1.state;
         log_everything(1, input_X1.want_cargo_on_out,
                           input_X1.is_acquired,
                           input_X1.is_done_m1, input_X1.is_done_m2,
                           input_X1.is_done_m3, input_X1.is_done_m4,
                           input_X1.is_done_m5, input_X1.is_done_m6,
-                          control1.state);
+                          st,
+                          out_X1.want_to_acquire, out_X1.want_to_release,
+                          (int)out_X1.go_base, (int)out_X1.go_shoulder,
+                          (int)out_X1.go_elbow, (int)out_X1.go_wrist_ver,
+                          (int)out_X1.go_wrist_rot, (int)out_X1.go_gripper);
+
     } else if (!is_active && !is_prev_passive_X1){
         is_prev_passive_X1 = true;
     }
@@ -371,7 +390,7 @@ void loop() {
     prev_input_X1.is_done_m6 = input_X1.is_done_m6;
     #endif
 
-    if (control1.state == ControllerX1::GO_UP_PICKUP_Z0) {
+    if (control1.state == ControllerX1::GO_UP_CLENCHED_Z0) {
         input_X1.want_cargo_on_out = false;
         digitalWrite(LAMP_X1_PIN, LOW);
         MESSAGE("*** The cargo pickuped from Z1 pos ***");
@@ -398,8 +417,8 @@ void loop() {
         auto out_X2 = control2.go_step(input_X2);
 
     #ifdef DEBUG_LOG
-    bool is_active = (bool)out_X2.active;
-    bool is_same_input = (input_X2.want_cargo_on_out == prev_input_X2.want_cargo_on_out &&
+    is_active = (bool)out_X2.active;
+    is_same_input = (input_X2.want_cargo_on_out == prev_input_X2.want_cargo_on_out &&
                              input_X2.is_acquired == prev_input_X2.is_acquired &&
                              input_X2.is_done_m1 == prev_input_X2.is_done_m1 &&
                              input_X2.is_done_m2 == prev_input_X2.is_done_m2 &&
@@ -412,12 +431,18 @@ void loop() {
         if (is_active){
             is_prev_passive_X2 = false;
         }
+        int st = control2.state;
         log_everything(2, input_X2.want_cargo_on_out,
                           input_X2.is_acquired,
                           input_X2.is_done_m1, input_X2.is_done_m2,
                           input_X2.is_done_m3, input_X2.is_done_m4,
                           input_X2.is_done_m5, input_X2.is_done_m6,
-                          control1.state);
+                          st,
+                          out_X2.want_to_acquire, out_X2.want_to_release,
+                          (int)out_X2.go_base, (int)out_X2.go_shoulder,
+                          (int)out_X2.go_elbow, (int)out_X2.go_wrist_ver,
+                          (int)out_X2.go_wrist_rot, (int)out_X2.go_gripper);
+
     } else if (!is_active && !is_prev_passive_X2){
         is_prev_passive_X2 = true;
     }
@@ -432,7 +457,7 @@ void loop() {
     prev_input_X2.is_done_m6 = input_X2.is_done_m6;
     #endif
 
-    if (control2.state == ControllerX2::GO_UP_PICKUP_Z0) {
+    if (control2.state == ControllerX2::GO_UP_CLENCHED_Z0) {
         input_X2.want_cargo_on_out = false;
         digitalWrite(LAMP_X2_PIN, LOW);
         MESSAGE("*** The cargo pickuped from Z2 pos ***");
@@ -459,8 +484,8 @@ void loop() {
         auto out_X3 = control3.go_step(input_X3);
 
     #ifdef DEBUG_LOG
-    bool is_active = (bool)out_X3.active;
-    bool is_same_input = (input_X3.want_cargo_on_out == prev_input_X3.want_cargo_on_out &&
+    is_active = (bool)out_X3.active;
+    is_same_input = (input_X3.want_cargo_on_out == prev_input_X3.want_cargo_on_out &&
                              input_X3.is_acquired == prev_input_X3.is_acquired &&
                              input_X3.is_done_m1 == prev_input_X3.is_done_m1 &&
                              input_X3.is_done_m2 == prev_input_X3.is_done_m2 &&
@@ -473,12 +498,18 @@ void loop() {
         if (is_active){
             is_prev_passive_X3 = false;
         }
+        int st = control3.state;
         log_everything(3, input_X3.want_cargo_on_out,
                           input_X3.is_acquired,
                           input_X3.is_done_m1, input_X3.is_done_m2,
                           input_X3.is_done_m3, input_X3.is_done_m4,
                           input_X3.is_done_m5, input_X3.is_done_m6,
-                          control1.state);
+                          st,
+                          out_X3.want_to_acquire, out_X3.want_to_release,
+                          (int)out_X3.go_base, (int)out_X3.go_shoulder,
+                          (int)out_X3.go_elbow, (int)out_X3.go_wrist_ver,
+                          (int)out_X3.go_wrist_rot, (int)out_X3.go_gripper);
+
     } else if (!is_active && !is_prev_passive_X3){
         is_prev_passive_X3 = true;
     }
@@ -493,7 +524,7 @@ void loop() {
     prev_input_X3.is_done_m6 = input_X3.is_done_m6;
     #endif
 
-    if (control3.state == ControllerX3::GO_UP_PICKUP_Z0) {
+    if (control3.state == ControllerX3::GO_UP_CLENCHED_Z0) {
         input_X3.want_cargo_on_out = false;
         digitalWrite(LAMP_X3_PIN, LOW);
         MESSAGE("*** The cargo pickuped from Z3 pos ***");
