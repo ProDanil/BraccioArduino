@@ -76,33 +76,33 @@ struct ControllerX2 {
 
     String state2string(State st){
         switch (st){
-            case 0:
+            case BEGIN:
                 return "BEGIN";
-            case 1:
+            case GO_WAIT:
                 return "GO_WAIT";
-            case 2:
+            case WAIT:
                 return "WAIT";
-            case 3:
+            case GO_UP_Z0:
                 return "GO_UP_Z0";
-            case 4:
+            case GO_LOW_Z0:
                 return "GO_LOW_Z0";
-            case 5:
+            case GO_PICKUP_Z0:
                 return "GO_PICKUP_Z0";
-            case 6:
+            case GO_UP_CLENCHED_Z0:
                 return "GO_UP_CLENCHED_Z0";
-            case 7:
+            case WAIT_ACK:
                 return "WAIT_ACK";
-            case 8:
+            case GO_UP_CLENCHED_Z1:
                 return "GO_UP_CLENCHED_Z1";
-            case 9:
+            case GO_LOW_CLENCHED_Z1:
                 return "GO_LOW_CLENCHED_Z1";
-            case 10:
+            case GO_DROP_Z1:
                 return "GO_DROP_Z1";
-            case 11:
+            case GO_UP_Z1:
                 return "GO_UP_Z1";
-            case 12:
+            case WAIT_RELEASE:
                 return "WAIT_RELEASE";
-            case 13:
+            case __SAME__:
                 return "__SAME__";
             default:
                 return "";
