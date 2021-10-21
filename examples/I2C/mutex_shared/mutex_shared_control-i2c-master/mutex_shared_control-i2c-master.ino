@@ -10,7 +10,7 @@
 #include "Controller3.hpp"
 
 #define DEBUG_LOG
-// #define DEBUG_MESSAGE
+#define DEBUG_MESSAGE
 
 // #ifdef DEBUG_LOG
 // #define LOG(mess) Serial.print(mess)
