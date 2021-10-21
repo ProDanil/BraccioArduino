@@ -292,14 +292,7 @@ void loop() {
         auto out = control1.out;
 
 #ifdef DEBUG_LOG
-        bool is_same_input = (input.want_cargo_on_out == last_input_X1.want_cargo_on_out &&
-                              input.is_acquired == last_input_X1.is_acquired &&
-                              input.is_done_m1 == last_input_X1.is_done_m1 &&
-                              input.is_done_m2 == last_input_X1.is_done_m2 &&
-                              input.is_done_m3 == last_input_X1.is_done_m3 &&
-                              input.is_done_m4 == last_input_X1.is_done_m4 &&
-                              input.is_done_m5 == last_input_X1.is_done_m5 &&
-                              input.is_done_m6 == last_input_X1.is_done_m6);
+        bool is_same_input = (input == last_input_X1);
 
         // Log everything, if necessary
         if (is_active || !is_same_input || !is_prev_passive_X1) {
@@ -370,14 +363,7 @@ void loop() {
         auto out = control2.out;
 
 #ifdef DEBUG_LOG
-        bool is_same_input = (input.want_cargo_on_out == last_input_X2.want_cargo_on_out &&
-                              input.is_acquired == last_input_X2.is_acquired &&
-                              input.is_done_m1 == last_input_X2.is_done_m1 &&
-                              input.is_done_m2 == last_input_X2.is_done_m2 &&
-                              input.is_done_m3 == last_input_X2.is_done_m3 &&
-                              input.is_done_m4 == last_input_X2.is_done_m4 &&
-                              input.is_done_m5 == last_input_X2.is_done_m5 &&
-                              input.is_done_m6 == last_input_X2.is_done_m6);
+        bool is_same_input = (input == last_input_X2);
 
         if (is_active || !is_same_input || !is_prev_passive_X2) {
             if (is_active) {
@@ -446,14 +432,7 @@ void loop() {
         auto out = control3.out;
 
 #ifdef DEBUG_LOG
-        bool is_same_input = (input.want_cargo_on_out == last_input_X3.want_cargo_on_out &&
-                              input.is_acquired == last_input_X3.is_acquired &&
-                              input.is_done_m1 == last_input_X3.is_done_m1 &&
-                              input.is_done_m2 == last_input_X3.is_done_m2 &&
-                              input.is_done_m3 == last_input_X3.is_done_m3 &&
-                              input.is_done_m4 == last_input_X3.is_done_m4 &&
-                              input.is_done_m5 == last_input_X3.is_done_m5 &&
-                              input.is_done_m6 == last_input_X3.is_done_m6);
+        bool is_same_input = (input == last_input_X3);
 
         if (is_active || !is_same_input || !is_prev_passive_X3) {
             if (is_active) {
