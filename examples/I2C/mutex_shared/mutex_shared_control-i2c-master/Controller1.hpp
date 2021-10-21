@@ -113,7 +113,7 @@ struct ControllerX1 {
         } else if (state == GO_UP_Z1 && is_done_all){
             next_state = WAIT_RELEASE;
 
-        } else if (((state == WAIT_RELEASE && !is_acquired) ||
+        } else if (((state == WAIT_RELEASE && !input.is_acquired) ||
                      state == GO_UP_Z0 || state == GO_LOW_Z0) && is_done_all) {
             next_state = GO_WAIT;
         }
@@ -196,12 +196,10 @@ struct ControllerX1 {
             // do nothing
         }
 
-        if (state == next_state){
-            out.active = false;
-        } else {
-            out.active = true;
+        if (next_state != __SAME__){
+            state = next_state;
         }
-        state = next_state;
+        out.active = (next_state != __SAME__);
         return out;
     }
 };
