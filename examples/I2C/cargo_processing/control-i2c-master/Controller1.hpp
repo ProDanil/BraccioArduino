@@ -44,22 +44,22 @@ struct ControllerX1 {
         GO_UP_Z01,
         GO_LOW_Z01,
         GO_PICKUP_Z01,
-        GO_UP_PICKUP_Z01,
-        GO_SAFE_PICKUP_Z01,
+        GO_UP_CLENCHED_Z01,
+        GO_SAFE_CLENCHED_Z01,
         GO_SAFE_Z02,
         GO_UP_Z02,
         GO_LOW_Z02,
         GO_PICKUP_Z02,
-        GO_UP_PICKUP_Z02,
-        GO_SAFE_PICKUP_Z02,
+        GO_UP_CLENCHED_Z02,
+        GO_SAFE_CLENCHED_Z02,
         GO_SAFE_Z1,
-        GO_UP_PICKUP_Z1,
-        GO_LOW_PICKUP_Z1,
+        GO_UP_CLENCHED_Z1,
+        GO_LOW_CLENCHED_Z1,
         GO_DROP_Z1,
         GO_UP_Z1,
         GO_SAFE_Z2,
-        GO_UP_PICKUP_Z2,
-        GO_LOW_PICKUP_Z2,
+        GO_UP_CLENCHED_Z2,
+        GO_LOW_CLENCHED_Z2,
         GO_DROP_Z2,
         GO_UP_Z2,
         __SAME__
@@ -117,10 +117,10 @@ struct ControllerX1 {
                 return "GO_LOW_Z01";
             case GO_PICKUP_Z01:
                 return "GO_PICKUP_Z01";
-            case GO_UP_PICKUP_Z01:
-                return "GO_UP_PICKUP_Z01";
-            case GO_SAFE_PICKUP_Z01:
-                return "GO_SAFE_PICKUP_Z01";
+            case GO_UP_CLENCHED_Z01:
+                return "GO_UP_CLENCHED_Z01";
+            case GO_SAFE_CLENCHED_Z01:
+                return "GO_SAFE_CLENCHED_Z01";
             case GO_SAFE_Z02:
                 return "GO_SAFE_Z02";
             case GO_UP_Z02:
@@ -129,26 +129,26 @@ struct ControllerX1 {
                 return "GO_LOW_Z02";
             case GO_PICKUP_Z02:
                 return "GO_PICKUP_Z02";
-            case GO_UP_PICKUP_Z02:
-                return "GO_UP_PICKUP_Z02";
-            case GO_SAFE_PICKUP_Z02:
-                return "GO_SAFE_PICKUP_Z02";
+            case GO_UP_CLENCHED_Z02:
+                return "GO_UP_CLENCHED_Z02";
+            case GO_SAFE_CLENCHED_Z02:
+                return "GO_SAFE_CLENCHED_Z02";
             case GO_SAFE_Z1:
                 return "GO_SAFE_Z1";
-            case GO_UP_PICKUP_Z1:
-                return "GO_UP_PICKUP_Z1";
-            case GO_LOW_PICKUP_Z1:
-                return "GO_LOW_PICKUP_Z1";
+            case GO_UP_CLENCHED_Z1:
+                return "GO_UP_CLENCHED_Z1";
+            case GO_LOW_CLENCHED_Z1:
+                return "GO_LOW_CLENCHED_Z1";
             case GO_DROP_Z1:
                 return "GO_DROP_Z1";
             case GO_UP_Z1:
                 return "GO_UP_Z1";
             case GO_SAFE_Z2:
                 return "GO_SAFE_Z2";
-            case GO_UP_PICKUP_Z2:
-                return "GO_UP_PICKUP_Z2";
-            case GO_LOW_PICKUP_Z2:
-                return "GO_LOW_PICKUP_Z2";
+            case GO_UP_CLENCHED_Z2:
+                return "GO_UP_CLENCHED_Z2";
+            case GO_LOW_CLENCHED_Z2:
+                return "GO_LOW_CLENCHED_Z2";
             case GO_DROP_Z2:
                 return "GO_DROP_Z2";
             case GO_UP_Z2:
@@ -191,10 +191,10 @@ struct ControllerX1 {
             next_state = GO_PICKUP_Z01;
 
         } else if (state == GO_PICKUP_Z01 && is_done_all) {
-            next_state = GO_UP_PICKUP_Z01;
+            next_state = GO_UP_CLENCHED_Z01;
 
-        } else if (state == GO_UP_PICKUP_Z01 && is_done_all) {
-            next_state = GO_SAFE_PICKUP_Z01;
+        } else if (state == GO_UP_CLENCHED_Z01 && is_done_all) {
+            next_state = GO_SAFE_CLENCHED_Z01;
 
         } else if (state == WAIT && input.want_cargo_on_Z2) {
             next_state = GO_SAFE_Z02;
@@ -209,21 +209,21 @@ struct ControllerX1 {
             next_state = GO_PICKUP_Z02;
 
         } else if (state == GO_PICKUP_Z02 && is_done_all) {
-            next_state = GO_UP_PICKUP_Z02;
+            next_state = GO_UP_CLENCHED_Z02;
 
-        } else if (state == GO_UP_PICKUP_Z02 && is_done_all) {
-            next_state = GO_SAFE_PICKUP_Z02;
+        } else if (state == GO_UP_CLENCHED_Z02 && is_done_all) {
+            next_state = GO_SAFE_CLENCHED_Z02;
 
-        } else if (state == GO_SAFE_PICKUP_Z01 && !input.cargo_on_Z1 && is_done_all) {
+        } else if (state == GO_SAFE_CLENCHED_Z01 && !input.cargo_on_Z1 && is_done_all) {
             next_state = GO_SAFE_Z1;
 
         } else if (state == GO_SAFE_Z1 && is_done_all) {
-            next_state = GO_UP_PICKUP_Z1;
+            next_state = GO_UP_CLENCHED_Z1;
 
-        } else if (state == GO_UP_PICKUP_Z1 && is_done_all) {
-            next_state = GO_LOW_PICKUP_Z1;
+        } else if (state == GO_UP_CLENCHED_Z1 && is_done_all) {
+            next_state = GO_LOW_CLENCHED_Z1;
 
-        } else if (state == GO_LOW_PICKUP_Z1 && is_done_all) {
+        } else if (state == GO_LOW_CLENCHED_Z1 && is_done_all) {
             next_state = GO_DROP_Z1;
 
         } else if (state == GO_DROP_Z1 && is_done_all) {
@@ -232,16 +232,16 @@ struct ControllerX1 {
         } else if ((state == GO_UP_Z1 || state == GO_SAFE_Z01 || state == GO_UP_Z01 || state == GO_LOW_Z01) && is_done_all) {
             next_state = GO_WAIT;
 
-        } else if (state == GO_SAFE_PICKUP_Z02 && !input.cargo_on_Z2 && is_done_all) {
+        } else if (state == GO_SAFE_CLENCHED_Z02 && !input.cargo_on_Z2 && is_done_all) {
             next_state = GO_SAFE_Z2;
 
         } else if (state == GO_SAFE_Z2 && is_done_all) {
-            next_state = GO_UP_PICKUP_Z2;
+            next_state = GO_UP_CLENCHED_Z2;
 
-        } else if (state == GO_UP_PICKUP_Z2 && is_done_all) {
-            next_state = GO_LOW_PICKUP_Z2;
+        } else if (state == GO_UP_CLENCHED_Z2 && is_done_all) {
+            next_state = GO_LOW_CLENCHED_Z2;
 
-        } else if (state == GO_LOW_PICKUP_Z2 && is_done_all) {
+        } else if (state == GO_LOW_CLENCHED_Z2 && is_done_all) {
             next_state = GO_DROP_Z2;
 
         } else if (state == GO_DROP_Z2 && is_done_all) {
@@ -290,14 +290,14 @@ struct ControllerX1 {
             out.go_wrist_ver = AngleWristVer::A170;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_UP_PICKUP_Z01) {
+        } else if (next_state == GO_UP_CLENCHED_Z01) {
             out.go_base = AngleBase::A90;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_SAFE_PICKUP_Z01) {
+        } else if (next_state == GO_SAFE_CLENCHED_Z01) {
             out.go_base = AngleBase::A0;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
@@ -332,14 +332,14 @@ struct ControllerX1 {
             out.go_wrist_ver = AngleWristVer::A170;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_UP_PICKUP_Z02) {
+        } else if (next_state == GO_UP_CLENCHED_Z02) {
             out.go_base = AngleBase::A90;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_SAFE_PICKUP_Z02) {
+        } else if (next_state == GO_SAFE_CLENCHED_Z02) {
             out.go_base = AngleBase::A180;
             out.go_shoulder = AngleShoulder::A65;
             out.go_elbow = AngleElbow::A180;
@@ -353,14 +353,14 @@ struct ControllerX1 {
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_UP_PICKUP_Z1) {
+        } else if (next_state == GO_UP_CLENCHED_Z1) {
             out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A115;
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_LOW_PICKUP_Z1) {
+        } else if (next_state == GO_LOW_CLENCHED_Z1) {
             out.go_base = AngleBase::A60;
             out.go_shoulder = AngleShoulder::A90;
             out.go_elbow = AngleElbow::A0;
@@ -388,14 +388,14 @@ struct ControllerX1 {
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_UP_PICKUP_Z2) {
+        } else if (next_state == GO_UP_CLENCHED_Z2) {
             out.go_base = AngleBase::A120;
             out.go_shoulder = AngleShoulder::A115;
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_LOW_PICKUP_Z2) {
+        } else if (next_state == GO_LOW_CLENCHED_Z2) {
             out.go_base = AngleBase::A120;
             out.go_shoulder = AngleShoulder::A90;
             out.go_elbow = AngleElbow::A0;
