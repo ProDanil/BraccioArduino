@@ -82,7 +82,6 @@ struct ControllerX1 {
         AngleGripper go_gripper;
         bool want_to_release;
         bool want_to_acquire;
-        String st;
     } out;
 
     String state2string(State s) {
