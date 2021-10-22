@@ -177,6 +177,51 @@ void update_leds() {
     digitalWrite(PIN_LED_PROCESSED_Z2, processed_Z2);
 }
 
+void log_everything(int index,
+                    bool want_cargo_on_Z1,
+                    bool want_cargo_on_Z2,
+                    bool cargo_on_or_processed_Z1,
+                    bool cargo_on_or_processed_Z2,
+                    bool is_done_m1,
+                    bool is_done_m2,
+                    bool is_done_m3,
+                    bool is_done_m4,
+                    bool is_done_m5,
+                    bool is_done_m6,
+                    String state,
+                    int base,
+                    int shoulder,
+                    int elbow,
+                    int wrist_ver,
+                    int wrist_rot,
+                    int gripper) {
+    Serial.print("[iter #" + String(iter) + "]");
+    Serial.print(" CONTROLLER_" + String(index));
+    if (index == 1){
+        Serial.print(" want_cargo_on_Z1=" + String(want_cargo_on_Z1));
+        Serial.print(" want_cargo_on_Z2=" + String(want_cargo_on_Z2));
+        Serial.print(" cargo_on_Z1=" + String(cargo_on_or_processed_Z1));
+        Serial.print(" cargo_on_Z2=" + String(cargo_on_or_processed_Z2));
+    } else {
+        Serial.print(" cargo_is_processed_Z1=" + String(cargo_on_or_processed_Z1));
+        Serial.print(" cargo_is_processed_Z2=" + String(cargo_on_or_processed_Z2));
+    }
+    Serial.print(" is_done_m1=" + String(is_done_m1));
+    Serial.print(" is_done_m2=" + String(is_done_m2));
+    Serial.print(" is_done_m3=" + String(is_done_m3));
+    Serial.print(" is_done_m4=" + String(is_done_m4));
+    Serial.print(" is_done_m5=" + String(is_done_m5));
+    Serial.print(" is_done_m6=" + String(is_done_m6));
+    Serial.print(" state=" + String(state));
+    Serial.print(" base=" + String(base));
+    Serial.print(" shoulder=" + String(shoulder));
+    Serial.print(" elbow=" + String(elbow));
+    Serial.print(" wrist_ver=" + String(wrist_ver));
+    Serial.print(" wrist_rot=" + String(wrist_rot));
+    Serial.println(" gripper=" + String(gripper));
+}
+
+
 void loop() {
     iter++;
 
@@ -237,42 +282,40 @@ void loop() {
         bool is_active = control1.go_step(input);
         auto out = control1.out;
 
+#ifdef DEBUG_LOG
         bool is_same_input_X1 = (input == last_input_X1);
 
-        if (is_active || !is_prev_passive_X1 || !is_same_input_X1) {
-            is_prev_passive_X1 = false;
-            LOG("[iter # " + String(iter) + "] ");
-            LOG("CONTROLLER_1 ");
-            LOG("want_cargo_on_Z1=" + String(input.want_cargo_on_Z1) + " ");
-            LOG("want_cargo_on_Z2=" + String(input.want_cargo_on_Z2) + " ");
-            LOG("cargo_on_Z1=" + String(input.cargo_on_Z1) + " ");
-            LOG("cargo_on_Z2=" + String(input.cargo_on_Z2) + " ");
-            LOG("is_done_m1=" + String(input.is_done_m1) + " ");
-            LOG("is_done_m2=" + String(input.is_done_m2) + " ");
-            LOG("is_done_m3=" + String(input.is_done_m3) + " ");
-            LOG("is_done_m4=" + String(input.is_done_m4) + " ");
-            LOG("is_done_m5=" + String(input.is_done_m5) + " ");
-            LOG("is_done_m6=" + String(input.is_done_m6));
-            LOG("\n");
-        }
-        if (!is_active && !is_prev_passive_X1) {
-            is_prev_passive_X1 = true;
-            LOG("[iter # " + String(iter) + "] ");
-            LOG("CONTROLLER_1 ");
-            LOG("want_cargo_on_Z1=" + String(input.want_cargo_on_Z1) + " ");
-            LOG("want_cargo_on_Z2=" + String(input.want_cargo_on_Z2) + " ");
-            LOG("cargo_on_Z1=" + String(input.cargo_on_Z1) + " ");
-            LOG("cargo_on_Z2=" + String(input.cargo_on_Z2) + " ");
-            LOG("is_done_m1=" + String(input.is_done_m1) + " ");
-            LOG("is_done_m2=" + String(input.is_done_m2) + " ");
-            LOG("is_done_m3=" + String(input.is_done_m3) + " ");
-            LOG("is_done_m4=" + String(input.is_done_m4) + " ");
-            LOG("is_done_m5=" + String(input.is_done_m5) + " ");
-            LOG("is_done_m6=" + String(input.is_done_m6));
-            LOG("\n");
+        // Log everything, if necessary
+        if (is_active || !is_same_input_X1 || !is_prev_passive_X1) {
+            if (is_active){
+                is_prev_passive_X1 = false;
+            }
+            log_everything(1,
+                            input.want_cargo_on_Z1,
+                            input.want_cargo_on_Z2,
+                            input.cargo_on_Z1,
+                            input.cargo_on_Z2,
+                            input.is_done_m1,
+                            input.is_done_m2,
+                            input.is_done_m3,
+                            input.is_done_m4,
+                            input.is_done_m5,
+                            input.is_done_m6,
+                            control1.state2string(control1.state),
+                            (int)out.go_base,
+                            (int)out.go_shoulder,
+                            (int)out.go_elbow,
+                            (int)out.go_wrist_ver,
+                            (int)out.go_wrist_rot,
+                            (int)out.go_gripper);
+
         }
 
-        if (control1.state == ControllerX1::GO_UP_PICKUP_Z01 || control1.state == ControllerX1::GO_UP_PICKUP_Z02) {
+        is_prev_passive_X1 = !is_active;
+
+#endif
+
+        if (control1.state == ControllerX1::GO_UP_CLENCHED_Z01 || control1.state == ControllerX1::GO_UP_CLENCHED_Z02) {
             MESSAGE("*** The cargo picked up from Z0 pos ***");
             request_Z1 = false;
             request_Z2 = false;
@@ -341,48 +384,42 @@ void loop() {
         bool is_active = control2.go_step(input);
         auto out = control2.out;
 
-        bool is_same_input_X2 = (input.cargo_is_processed_Z1 == last_input_X2.cargo_is_processed_Z1 &&
-                                 input.cargo_is_processed_Z2 == last_input_X2.cargo_is_processed_Z2 &&
-                                 input.is_done_m1 == last_input_X2.is_done_m1 &&
-                                 input.is_done_m2 == last_input_X2.is_done_m2 &&
-                                 input.is_done_m3 == last_input_X2.is_done_m3 &&
-                                 input.is_done_m4 == last_input_X2.is_done_m4 &&
-                                 input.is_done_m5 == last_input_X2.is_done_m5 &&
-                                 input.is_done_m6 == last_input_X2.is_done_m6);
+#ifdef DEBUG_LOG
+        bool is_same_input_X2 = (input == last_input_X2);
 
-        if (is_active || !is_prev_passive_X2 || !is_same_input_X2) {
-            is_prev_passive_X2 = false;
-            LOG("[iter # " + String(iter) + "] ");
-            LOG("CONTROLLER_2 ");
-            LOG("cargo_is_processed_Z1=" + String(input.cargo_is_processed_Z1) + " ");
-            LOG("cargo_is_processed_Z2=" + String(input.cargo_is_processed_Z2) + " ");
-            LOG("is_done_m1=" + String(input.is_done_m1) + " ");
-            LOG("is_done_m2=" + String(input.is_done_m2) + " ");
-            LOG("is_done_m3=" + String(input.is_done_m3) + " ");
-            LOG("is_done_m4=" + String(input.is_done_m4) + " ");
-            LOG("is_done_m5=" + String(input.is_done_m5) + " ");
-            LOG("is_done_m6=" + String(input.is_done_m6));
-            LOG("\n");
-        }
-        if (!is_active && !is_prev_passive_X2) {
-            is_prev_passive_X2 = true;
-            LOG("[iter # " + String(iter) + "] ");
-            LOG("CONTROLLER_2 ");
-            LOG("cargo_is_processed_Z1=" + String(input.cargo_is_processed_Z1) + " ");
-            LOG("cargo_is_processed_Z2=" + String(input.cargo_is_processed_Z2) + " ");
-            LOG("is_done_m1=" + String(input.is_done_m1) + " ");
-            LOG("is_done_m2=" + String(input.is_done_m2) + " ");
-            LOG("is_done_m3=" + String(input.is_done_m3) + " ");
-            LOG("is_done_m4=" + String(input.is_done_m4) + " ");
-            LOG("is_done_m5=" + String(input.is_done_m5) + " ");
-            LOG("is_done_m6=" + String(input.is_done_m6));
-            LOG("\n");
+        if (is_active || !is_same_input_X2 || !is_prev_passive_X2) {
+            if (is_active){
+                is_prev_passive_X2 = false;
+            }
+            log_everything(2,
+                           false,                        // there isn't input.want_cargo_on_Z1
+                           false,                        // there isn't input.want_cargo_on_Z2
+                           input.cargo_is_processed_Z1,  // instead of cargo_on_Z1
+                           input.cargo_is_processed_Z2,  // instead of cargo_on_Z2
+                           input.is_done_m1,
+                           input.is_done_m2,
+                           input.is_done_m3,
+                           input.is_done_m4,
+                           input.is_done_m5,
+                           input.is_done_m6,
+                           control2.state2string(control2.state),
+                           (int)out.go_base,
+                           (int)out.go_shoulder,
+                           (int)out.go_elbow,
+                           (int)out.go_wrist_ver,
+                           (int)out.go_wrist_rot,
+                           (int)out.go_gripper);
+
         }
 
-        if (control2.state == ControllerX2::GO_UP_PICKUP_Z1) {
+        is_prev_passive_X2 = !is_active;
+
+#endif
+
+        if (control2.state == ControllerX2::GO_UP_CLENCHED_Z1) {
             processed_Z1 = false;
             occupied_Z1 = false;
-        } else if (control2.state == ControllerX2::GO_UP_PICKUP_Z2) {
+        } else if (control2.state == ControllerX2::GO_UP_CLENCHED_Z2) {
             processed_Z2 = false;
             occupied_Z2 = false;
         }
