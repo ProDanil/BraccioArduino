@@ -34,7 +34,6 @@ struct ControllerX1 {
     };
 
     enum State {
-        BEGIN,
         S1,
         S2,
         S3,
@@ -49,7 +48,7 @@ struct ControllerX1 {
         S12,
         S13,
         __SAME__
-    } state = BEGIN;
+    } state = S1;
 
     struct Input {
         bool want_cargo_on_out;
@@ -76,8 +75,6 @@ struct ControllerX1 {
 
     String state2string(State s) {
         switch (s) {
-            case BEGIN:
-                return "BEGIN";
             case S1:
                 return "S1";
             case S2:
@@ -120,8 +117,6 @@ struct ControllerX1 {
 
         // Compute the next state
         if (0) {
-        } else if (state == BEGIN) {
-            next_state = S1;
         } else if (state == S1 && (!is_acquired)) {
             next_state = S2;
         } else if (state == S2 && (want_cargo_on_out)) {
