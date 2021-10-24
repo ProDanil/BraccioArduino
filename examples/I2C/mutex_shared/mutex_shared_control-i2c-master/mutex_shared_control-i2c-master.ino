@@ -5,7 +5,15 @@
 
 #include <Wire.h>
 
+#define GENERATED_X1
+#define ALLDONE_X1
+
+#ifdef GENERATED_X1
+#include "generated_Controller1.hpp"
+#else
 #include "Controller1.hpp"
+#endif
+
 #include "Controller2.hpp"
 #include "Controller3.hpp"
 
@@ -335,13 +343,23 @@ void loop() {
         input.want_cargo_on_out = occupied_Z1;
         input.is_acquired = (mutex.acquired == 1);
         read_current_angles(I2C_ADDR_SLAVE_X1, current_angle_X1);
+#ifdef ALLDONE_X1
+        input.is_done_all = (current_angle_X1[0] == target_angle_X1[0]) &&
+                            (current_angle_X1[1] == target_angle_X1[1]) &&
+                            (current_angle_X1[2] == target_angle_X1[2]) &&
+                            (current_angle_X1[3] == target_angle_X1[3]) &&
+                            (current_angle_X1[4] == target_angle_X1[4]) &&
+                            (current_angle_X1[5] == target_angle_X1[5]);
+#else
         input.is_done_m1 = (current_angle_X1[0] == target_angle_X1[0]);
         input.is_done_m2 = (current_angle_X1[1] == target_angle_X1[1]);
         input.is_done_m3 = (current_angle_X1[2] == target_angle_X1[2]);
         input.is_done_m4 = (current_angle_X1[3] == target_angle_X1[3]);
         input.is_done_m5 = (current_angle_X1[4] == target_angle_X1[4]);
         input.is_done_m6 = (current_angle_X1[5] == target_angle_X1[5]);
+#endif  // ALLDONE_X1
 
+#ifndef GENERATED_X1
 #ifdef DEBUG_MESSAGE
         // Print inputs controller 1
         print_input_control(
@@ -350,12 +368,14 @@ void loop() {
             input.is_done_m1, input.is_done_m2,
             input.is_done_m3, input.is_done_m4,
             input.is_done_m5, input.is_done_m6);
-#endif
+#endif  // DEBUG_MESSAGE
+#endif  // GENERATED_X1
 
         // Execute the controller
         bool is_active = control1.go_step(input);
         auto out = control1.out;
 
+#ifndef GENERATED_X1
 #ifdef DEBUG_LOG
         bool is_same_input = (input == last_input_X1);
 
@@ -385,7 +405,7 @@ void loop() {
         }
 
         is_prev_passive_X1 = !is_active;
-#endif
+#endif  // DEBUG_LOG
 
         if (control1.state == ControllerX1::GO_UP_CLENCHED_Z0) {
             MESSAGE("*** The cargo pickuped from Z1 pos ***");
@@ -400,7 +420,7 @@ void loop() {
                              target_angle_X1[3] == (int)out.go_wrist_ver &&
                              target_angle_X1[4] == (int)out.go_wrist_rot &&
                              target_angle_X1[5] == (int)out.go_gripper;
-#endif
+#endif  // DEBUG_MESSAGE
 
         // Send controls to the plant
         target_angle_X1[0] = (int)out.go_base;
@@ -416,7 +436,9 @@ void loop() {
         if (is_new_target) {
             print_out_control(1, target_angle_X1);
         }
-#endif
+#endif  // DEBUG_MESSAGE
+
+#endif  // GENERATED_X1
 
         // Update last_input
         last_input_X1 = input;
