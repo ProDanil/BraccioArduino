@@ -440,6 +440,17 @@ void loop() {
 
 #endif  // GENERATED_X1
 
+#ifdef GENERATED_X1
+        // Send controls to the plant
+        target_angle_X1[0] = (int)out.base;
+        target_angle_X1[1] = (int)out.shoulder;
+        target_angle_X1[2] = (int)out.elbow;
+        target_angle_X1[3] = (int)out.wrist_ver;
+        target_angle_X1[4] = (int)out.wrist_rot;
+        target_angle_X1[5] = (int)out.gripper;
+        send_target_angles(I2C_ADDR_SLAVE_X1, target_angle_X1);
+#endif
+        
         // Update last_input
         last_input_X1 = input;
         // Update last_out
