@@ -50,8 +50,8 @@ struct ControllerX2 {
         GO_PICKUP_Z2,
         GO_UP_CLENCHED_Z2,
         GO_SAFE_CLENCHED_Z2,
-        GO_SAFE_Z31,
-        GO_SAFE_Z32,
+        GO_SAFE_Z13,
+        GO_SAFE_Z23,
         GO_UP_CLENCHED_Z3,
         GO_LOW_CLENCHED_Z3,
         GO_DROP_Z3,
@@ -123,10 +123,10 @@ struct ControllerX2 {
                 return "GO_UP_CLENCHED_Z2";
             case GO_SAFE_CLENCHED_Z2:
                 return "GO_SAFE_CLENCHED_Z2";
-            case GO_SAFE_Z31:
-                return "GO_SAFE_Z31";
-            case GO_SAFE_Z32:
-                return "GO_SAFE_Z32";
+            case GO_SAFE_Z13:
+                return "GO_SAFE_Z13";
+            case GO_SAFE_Z23:
+                return "GO_SAFE_Z23";
             case GO_UP_CLENCHED_Z3:
                 return "GO_UP_CLENCHED_Z3";
             case GO_LOW_CLENCHED_Z3:
@@ -197,12 +197,12 @@ struct ControllerX2 {
             next_state = GO_SAFE_CLENCHED_Z2;
 
         } else if (state == GO_SAFE_CLENCHED_Z1 && is_done_all) {
-            next_state = GO_SAFE_Z31;
+            next_state = GO_SAFE_Z13;
 
         } else if (state == GO_SAFE_CLENCHED_Z2 && is_done_all) {
-            next_state = GO_SAFE_Z32;
+            next_state = GO_SAFE_Z23;
 
-        } else if ((state == GO_SAFE_Z31 || state == GO_SAFE_Z32) && is_done_all) {
+        } else if ((state == GO_SAFE_Z13 || state == GO_SAFE_Z23) && is_done_all) {
             next_state = GO_UP_CLENCHED_Z3;
 
         } else if (state == GO_UP_CLENCHED_Z3 && is_done_all) {
@@ -313,14 +313,14 @@ struct ControllerX2 {
             out.go_wrist_ver = AngleWristVer::A165;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_SAFE_Z31) {
+        } else if (next_state == GO_SAFE_Z13) {
             out.go_base = AngleBase::A180;
             out.go_shoulder = AngleShoulder::A115;
             out.go_elbow = AngleElbow::A0;
             out.go_wrist_ver = AngleWristVer::A15;
             out.go_wrist_rot = AngleWristRot::A90;
             out.go_gripper = AngleGripper::A73;
-        } else if (next_state == GO_SAFE_Z32) {
+        } else if (next_state == GO_SAFE_Z23) {
             out.go_base = AngleBase::A0;
             out.go_shoulder = AngleShoulder::A115;
             out.go_elbow = AngleElbow::A0;
