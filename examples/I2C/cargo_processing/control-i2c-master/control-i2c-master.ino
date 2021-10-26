@@ -260,7 +260,8 @@ void loop() {
         ControllerX1::Input input;
         input.want_cargo_on_Z1 = request_Z1;
         input.want_cargo_on_Z2 = request_Z2;
-        input.cargo_on_Z2 = true;
+        input.cargo_on_Z1 = occupied_Z1;
+        input.cargo_on_Z2 = occupied_Z2;
         read_current_angles(I2C_ADDR_SLAVE_X1, current_angle_X1);
         input.is_done_m1 = (current_angle_X1[0] == target_angle_X1[0]);
         input.is_done_m2 = (current_angle_X1[1] == target_angle_X1[1]);
