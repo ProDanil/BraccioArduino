@@ -79,7 +79,6 @@ struct ControllerX1 {
         AngleWristRot go_wrist_rot;
         AngleGripper go_gripper;
         bool ready;
-        String st;
     } out;
 
     String state2string(State s) {
