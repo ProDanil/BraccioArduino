@@ -127,7 +127,7 @@ struct Mutex {
 
             } else if (X2) {
                 if (X3) {
-                    if (mutex_flag = 2) {
+                    if (mutex_flag == 2) {
                         MESSAGE("GO_X3");
                         mutex_flag = 0;
                         acquired = 3;
